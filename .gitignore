@@ -216,3 +216,8 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+CLAUDE.md
+
+# Datos confidenciales (paper: "The data that has been used is confidential")
+data/
