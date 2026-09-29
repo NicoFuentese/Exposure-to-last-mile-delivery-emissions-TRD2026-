@@ -221,3 +221,9 @@ CLAUDE.md
 
 # Datos confidenciales (paper: "The data that has been used is confidential")
 data/
+
+# Resultados generados (tablas/figuras); se versionan solo los finales elegidos a mano
+outputs/
+
+# uv.lock: vacío mientras las dependencias vivan en requirements.txt (ver README); reevaluar al congelar el entorno
+uv.lock

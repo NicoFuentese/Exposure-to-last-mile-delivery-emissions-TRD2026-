@@ -35,16 +35,51 @@ Si añades información nueva, etiquétala igual. Si algo del paper no está aqu
 5. **Zona horaria:** los timestamps del GPS vienen en UTC (`Z`). Convertir a `America/Santiago` (UTC−3 en noviembre) **antes** de asignar horas o días de la semana.
 6. **Validación contra el paper:** los objetivos numéricos son las Tablas 4 y 5 (§6). Comparar celda a celda (signo, magnitud, estrellas) y registrar las diferencias.
 7. **Al recibir datos nuevos:** perfilarlos (columnas, rangos, nulos, duplicados, ventanas temporales, cobertura) y actualizar §8 antes de usarlos.
-8. Instalar paquetes solo con el OK del usuario; proponer un `requirements.txt` cuando se defina el stack.
+8. Instalar paquetes solo con el OK del usuario. El entorno `uv` y `requirements.txt` (versiones fijadas) ya existen (§2).
 
 ---
 
 ## 2. Stack
 
 - **Python** es el lenguaje de la réplica. R solo para un caso puntual y justificado (p. ej. contrastar el ZINB); no complicarlo.
-- **Entorno virtual con `uv`** (decisión del usuario, en lugar de `venv`): `uv` 0.11.23, entorno en `.venv/` (ignorado por git), Python 3.12. Dependencias en `requirements.txt` con versiones fijadas. Crear/recrear: `uv venv --python 3.12 .venv` y `uv pip install --python .venv -r requirements.txt`. Ejecutar con `.venv/Scripts/python.exe` (Windows). El Python del sistema **no** tiene las librerías de modelación: usar siempre el `.venv`. Añadir una dependencia = editar `requirements.txt` (con versión fijada) e instalarla con `uv pip`; no instalar nada en el Python global.
+- **Entorno virtual con `uv`** (decisión del usuario, en lugar de `venv`): `uv` 0.11.23, entorno en `.venv/` (ignorado por git), Python 3.12. Dependencias en `requirements.txt` con versiones fijadas. Crear/recrear: `uv venv --python 3.12 .venv` `uv pip install --python .venv -r requirements.txt` y `uv pip install --python .venv -e . --no-deps` (instala el paquete `lastmile_exposure` en modo editable). Ejecutar con `.venv/Scripts/python.exe` (Windows). El Python del sistema **no** tiene las librerías de modelación: usar siempre el `.venv`. Añadir una dependencia = editar `requirements.txt` (con versión fijada) e instalarla con `uv pip`; no instalar nada en el Python global.
 - `[Verificado 2026-09-29]` Versiones: `numpy 2.5.3`, `pandas 3.0.6`, `pyarrow 25.0.1`, `scipy 1.18.1`, `statsmodels 0.15.0`, `h3 4.5.0` (API v4: `h3.latlng_to_cell`, no `geo_to_h3`), `shapely 2.1.2`, `pyproj 3.8.0`, `geopandas 1.2.0`, `libpysal 4.15.0`, `esda 2.10.0`, `matplotlib 3.11.2`, `tzdata 2026.4`, y de desarrollo `pytest 9.1.1`, `ruff 0.16.9`, `ipykernel 7.3.0`. Pruebas de humo superadas: ZINB con errores por cluster (`ZeroInflatedNegativeBinomialP`, inflación constante), logit y OLS con cluster, H3 res. 9, offset de `America/Santiago`, GeoDataFrame → EPSG:32719, Moran (`esda`), parquet, Wasserstein. La primera importación en un entorno recién creado en Windows tarda minutos; es normal.
 - Distancias en metros: proyectar a un CRS métrico (p. ej. WGS 84 / UTM 19S, EPSG:32719 `[Supuesto]`, a confirmar con el usuario) antes de medir longitudes.
+
+
+### 2.1 Estructura del proyecto (acordada con el usuario, 2026-09-29)
+
+Diseño modular: **un módulo por concepto del paper**, para que cualquiera encuentre una fórmula o un paso. Índice completo paper → módulo en `docs/paper_map.md`.
+
+```
+src/lastmile_exposure/      # paquete (layout src/, instalable en editable, sin dependencias en pyproject)
+├── config.py               # constantes del paper y rutas; enum Variant (as_published | local_time)
+├── io/                     # lectura y validación de datos
+├── timeutils/              # UTC -> America/Santiago, miércoles
+├── exposure/               # variable resultado: vehicles_counts, vehicles_distance, aggregate, noise (futuro)
+├── demographics/           # regresores D_hi (shares dinámicos y estáticos)
+├── panel.py                # fusión hexágono-hora
+├── models/                 # zinb, ols, two_part, marginal_effects
+├── inference/              # cluster por comuna, Moran, Cameron-Trivedi
+├── reporting/              # tablas 2/4/5, estrellas, emisiones (Fig. 7)
+├── figures/                # mapas (Figs. 1-2) y efectos marginales (Figs. 6-10)
+└── validation/             # comparación celda a celda contra el paper
+reference/paper_tables/     # cifras publicadas de las Tablas 2-5 (CSV, se versionan)
+scripts/                    # NN_*.py, uno por fase; delgados, sin lógica
+tests/                      # test_config, test_structure, validation/
+docs/paper_map.md           # índice paper -> módulo
+notebooks/                  # solo exploración
+outputs/<variante>/         # resultados; ignorado por git
+```
+
+Reglas de esta estructura:
+1. **Todo módulo abre con un docstring** con `Paper:`, `Código de los autores:`, `Hallazgos` y `Estado:` (lo exige `tests/test_structure.py`). Toda función que implemente una fórmula cita la ecuación y, si el código de los autores difiere del texto, su hallazgo. Docstrings en español; identificadores en inglés.
+2. **La métrica de exposición es intercambiable:** los modelos reciben un panel hexágono-hora con la columna resultado y los `share_*`; `exposure/` la construye (vehículos hoy, ruido en la Fase 8) sin tocar `models/`.
+3. **Las variantes son configuración** (`config.Variant`), no copias del código. Resultados por variante en `outputs/<variante>/`.
+4. **Los números del paper que se usan en más de un módulo viven en `config.py`.** Las cifras publicadas de tablas viven en `reference/paper_tables/`.
+5. **Sin lógica en `scripts/` ni en `notebooks/`.**
+6. El código R de los autores **no se versiona**: queda en `data/replication_package/` y se cita por ruta en los docstrings (no sabemos si podemos redistribuirlo).
+7. Al implementar o reproducir algo, actualizar el estado en `docs/paper_map.md` y en `Estado:` del módulo.
 
 ---
 
@@ -239,7 +274,7 @@ Fuente: el *replication package* de los autores (`data/TRD_replication_share.zip
 
 | ID | Tema | Hallazgo |
 |---|---|---|
-| H1 | **Hora = UTC** (crítico) | `[Paquete]` `03_gps_hexagon_count.R` hace `hour(timestamp)` sin convertir zona, y `01_extract_wednesday.R` define el miércoles con `as.Date(timestamp)` (fecha UTC). `[Verificado]` Al comparar `hexagon_count_27-11-2024_cleaned.csv` con nuestro GPS crudo del mismo día: con etiqueta de hora **UTC** coinciden el 60,7 % de los hexágono-hora (correlación 0,927; diferencia de totales por ser nuestro CSV un subconjunto filtrado); con hora **local** solo el 8,1 % (corr. 0,631). Luego la columna `hour` de los conteos son horas UTC (0–23), y se fusiona por `hour` con las horas 7–22 de la población (`hora`), que se presume local `[Abierto]`. Chile es UTC−3 (aprox. sept–abr) y UTC−4 el resto: desfase de 3–4 h y un "miércoles" que en hora local va de martes ~20:00 a miércoles ~20:00. **Decisión pendiente del usuario** (ver §7.3-D1). |
+| H1 | **Hora = UTC** (crítico) | `[Paquete]` `03_gps_hexagon_count.R` hace `hour(timestamp)` sin convertir zona, y `01_extract_wednesday.R` define el miércoles con `as.Date(timestamp)` (fecha UTC). `[Verificado]` Al comparar `hexagon_count_27-11-2024_cleaned.csv` con nuestro GPS crudo del mismo día: con etiqueta de hora **UTC** coinciden el 60,7 % de los hexágono-hora (correlación 0,927; diferencia de totales por ser nuestro CSV un subconjunto filtrado); con hora **local** solo el 8,1 % (corr. 0,631). Luego la columna `hour` de los conteos son horas UTC (0–23), y se fusiona por `hour` con las horas 7–22 de la población (`hora`), que se presume local `[Abierto]`. Chile es UTC−3 (aprox. sept–abr) y UTC−4 el resto: desfase de 3–4 h y un "miércoles" que en hora local va de martes ~20:00 a miércoles ~20:00. **Decisión acordada con el usuario:** ver §7.3-D1. |
 | H2 | **Mediana solo sobre días presentes** | `[Paquete]` `04_modeling_wedenesday.R`: los archivos diarios `hexagon_count_*` solo contienen hexágono-horas con ≥1 vehículo; `median(vehicles)` se calcula sobre esos días y `count_wednesdays = .N`. Los días sin vehículos **no entran como 0**. `[Verificado]` Recalculado desde los 42 archivos diarios reproduce el 100 % de `median_vehicles` y `count_wednesdays` de `00_data/hexagon_model_median_wednesdays_RM.csv`. Un hexágono-hora con ≥1 vehículo en un solo miércoles queda con esa cifra como "mediana" (sesgo al alza respecto de la mediana sobre los 42 días). Mismo criterio para distancia y tiempo. |
 | H3 | **Nº de miércoles** | 42 archivos diarios `[Verificado]` (2024-01-03 … 2024-11-27), frente a **41** del paper (Tabla 3) y **44** del README del paquete. Incluye el 2024-05-01 (feriado; archivo mucho más pequeño); el 2024-09-18 (feriado) sí está excluido. Sin julio ni diciembre, coherente con el paper. |
 | H4 | **Distancia ≠ Fig. 5** | `[Paquete]` `03_alternative_metrics.R` **no recorta trayectorias por hexágono**. Calcula haversine entre pings consecutivos del mismo `owner_id` y **conserva solo pares cuyo ping previo y actual están en el mismo hexágono y la misma hora**; los tramos que cruzan hexágono u hora se **descartan**. Además elimina pares con `time_diff = 0` y con velocidad > 100 km/h (33,33 m/s). No hay tope de brecha temporal. Suma por (hex, hora, vehículo) y luego por (hex, hora). `median_time` = Σ de segundos. |
@@ -252,7 +287,7 @@ Fuente: el *replication package* de los autores (`data/TRD_replication_share.zip
 | H11 | **Variantes del ZINB** | `[Paquete]` Principal: `pscl::zeroinfl(vehicles ~ X \| 1, dist="negbin")` con `vehicles = round(median_vehicles)` (R redondea a par: 0,5→0; 1,5→2) y SE de `sandwich::vcovCL(cluster = comuna)` (bloque de conteo); `p = 2(1−Φ(|β/se|))` normal. Variante `summary_results.R`: `glmmTMB(..., family=nbinom2, ziformula=~1)` **sin** cluster. Variantes con covariables en la inflación (`*_cov.R`, `zinb_marginal_effects_with_covariates.R`) usan otra fórmula de AME. |
 | H12 | **SE en los OLS** | `[Paquete]` `fixest::feols(..., cluster = ~comuna)`; los p-valores se recalculan con la normal (no t). El logit del modelo de dos partes no lleva cluster; el SE del AME de dos partes es una aproximación burda (suma en cuadratura). `summary_results_fe.R` añade efectos fijos de comuna (`\| comuna`) solo a los OLS: probable origen de la frase "controla por ubicación" de §6.2 del paper. **No consta** cuál variante generó las estrellas del paper. |
 | H13 | **Observaciones con población 0** | `[Verificado]` 1.427 filas (0,8 %) tienen `poblacion_flotante = 0` y **todos los shares = 0** (no NaN); entran igual a las regresiones (198 tienen `median_vehicles > 0`). Los shares suman como máximo 1,0066. |
-| H14 | **Hexágonos fuera de la grilla** | `[Verificado]` Los conteos tienen 16.400 hexágonos distintos con ≥1 ping, de los que solo 11.144 están en el panel; los 5.256 restantes se pierden en el `merge` (`all.x = TRUE` sobre el panel). Hexágono-horas del panel sin vehículos → 0. |
+| H14 | **Hexágonos fuera de la grilla** | `[Verificado]` Los conteos tienen 16.400 hexágonos distintos con ≥1 ping en algún miércoles: **9.212 están dentro de la grilla de 11.144 y 7.188 fuera**; estos últimos se pierden en el `merge` (`all.x = TRUE` sobre el panel). A su vez, **1.932 hexágonos de la grilla nunca tuvieron un vehículo** (todo ceros). Hexágono-horas del panel sin vehículos → 0. |
 | H15 | **Tabla 2 reproducida** | `[Verificado]` `miercoles_rm.csv` reproduce exactamente Mean y Std de la Tabla 2 (población 472,78 / 938,57; hombres 232,93 / 464,99; …). `Mean (%)` = media del conteo del grupo ÷ población media; `Std (%)` = **desviación estándar de los shares ponderada por población** (filas con pob > 0). |
 | H16 | **Período de la población** | `[Paquete]` `00_data/README.md`: "mediana de miércoles del semestre", cita la *Nota metodológica – Población flotante – S2 2024 V2* del proveedor (no incluida). El paper dice marzo–junio 2024. Además, la población es **mediana** (no promedio, cf. §3.1 del paper). |
 | H17 | **Contexto del proyecto** | `[Paquete]` README raíz: "Para ruido, la idea sería reemplazar [`median_vehicles`] por tu métrica de ruido y reutilizar el mismo pipeline". El objetivo posterior del usuario (proyecto *Noise Map*) es aplicar este pipeline a ruido. |
@@ -264,14 +299,14 @@ Fuente: el *replication package* de los autores (`data/TRD_replication_share.zip
 
 | Objetivo | Estado |
 |---|---|
-| Tabla 2 (Mean, Std, Mean %, Std %) | ✅ exacta (H15). Wasserstein/ranks: no reproducidos. |
-| Tabla 4 — cols. OLS `K̃`, "OLS `K̃>0`" (dos partes), `log K̃` (estimaciones puntuales) | ✅ exactas (H7, H8) |
-| Tabla 5 — mismas 3 columnas (estático) | ✅ exactas |
+| Tabla 2 (Mean, Std, Mean %, Std %) | ✅ exacta (H15); implementada en `reporting/table2.py`, `scripts/01_table2.py`. Wasserstein/ranks: no reproducidos. |
+| Tabla 4 — cols. OLS `K̃`, "OLS `K̃>0`" (dos partes), `log K̃` (estimaciones puntuales) | ✅ exactas (H7, H8); implementadas en `models/ols.py`, `models/two_part.py`, `scripts/02_distance_tables.py` (pruebas en `tests/validation/`) |
+| Tabla 5 — mismas 3 columnas (estático) | ✅ exactas (mismo script) |
 | Tablas 4 y 5 — col. ZINB | ⏳ pendiente (requiere estimar ZINB; ver H10) |
 | Estrellas de significancia (todas las tablas) | ⏳ pendiente (requiere SE con cluster por comuna, H11–H12) |
 | Moran's I (0,4694 / 0,4756), Cameron–Trivedi (7,73), π | ⏳ pendiente |
 | Figs. 1, 2, 6–10 | ⏳ pendiente |
-| Conversión UTC → hora local (solo conteos) | ✅ validada contra el GPS crudo del 27‑11 (H18); pendiente aplicarla al modelo. |
+| Conversión UTC → hora local (solo conteos) | ✅ validada contra el GPS crudo del 27‑11 (H18) en exploración; **sin código en el paquete todavía** (`timeutils/local_time.py`, Fase 5). |
 
 ### 7.3 Decisiones y ambigüedades abiertas
 
@@ -289,7 +324,6 @@ Fuente: el *replication package* de los autores (`data/TRD_replication_share.zip
 | D10 | B | Wasserstein, gramos NOx/PM | Método de Wasserstein y factores de emisión/multiplicador mensual sin documentar (§5.7 y Tabla 2). Baja prioridad. |
 | D11 | B | Validación | Las tablas no reportan N, θ, π ni SE: solo se compara signo/magnitud/estrellas (más lo que reporte el ajuste propio). |
 
-Ambigüedades del borrador anterior **resueltas** por el código: A1 (efectos fijos: solo comuna-FE en una variante de OLS, H12), A2/A3 (definición del AME y software, H10–H11), A4 (`log` solo sobre `K̃>0`, H8), A7 (mediana, H16), A9 (comuna incluida en el panel), A11 (`datosxhexagono.csv`, ver §8), A15 (`round()` de R, H11).
 
 ---
 
@@ -336,7 +370,7 @@ Regresores `X` (11): `genero_masc, gse_c1a, gse_c1b, gse_c2, gse_c3, gse_de (= g
 - GPS crudo o, al menos, distancias diarias por hexágono-hora si se quiere rehacer/alterar la construcción (p. ej. hora local, recorte real por hexágono, o una métrica de ruido).
 - **Solicitud pendiente a los autores (D1):** GPS crudo o conteos/distancias diarios por fecha local; confirmación de la base horaria de la población; nota del proveedor.
 - Nota metodológica del proveedor de población (definición de `hora`, período, cómo se hizo la demografía estática).
-- Entorno: faltan en Python `statsmodels`, `scipy`, `geopandas`/`shapely`/`pyproj`, `esda`/`libpysal`; R 4.6.1 está instalado pero solo con `MASS` (faltan `pscl`, `glmmTMB`, `fixest`, `sandwich`, etc.). Instalar solo con el OK del usuario.
+- Entorno: Python resuelto (§2). R 4.6.1 está instalado solo con `MASS` (faltan `pscl`, `glmmTMB`, `fixest`, `sandwich`, etc.); se instalarían solo si se decide contrastar el ZINB en R, con el OK del usuario.
 
 ---
 
@@ -345,7 +379,7 @@ Regresores `X` (11): `genero_masc, gse_c1a, gse_c1b, gse_c2, gse_c3, gse_de (= g
 | Paper | Significado | Sugerencia de nombre |
 |---|---|---|
 | `h ∈ H` | hexágono H3 res. 9 | `h3_cell` |
-| `i ∈ I` | hora local (7…22) | `hour` |
+| `i ∈ I` | hora (etiquetas 7…22). En el paquete de los autores es hora UTC (H1); en la variante `local_time`, hora de `America/Santiago` | `hour` |
 | día | miércoles de la muestra | `date` |
 | `Y_hi` | nº de vehículos distintos con ≥1 ping, por día | `veh_count_day` |
 | `Ỹ_hi` | mediana entre días de `Y_hi` (dep. del ZINB) | `veh_count` |
@@ -364,7 +398,7 @@ Regresores `X` (11): `genero_masc, gse_c1a, gse_c1b, gse_c2, gse_c3, gse_de (= g
 - **Fase 0 — Comprensión del paper:** ✅ (2026-09-29).
 - **Fase 1 — AGENTS.md:** ✅ (verificado contra la capa de texto del PDF y contra el replication package).
 - **Fase 2 — Análisis del paquete y datos:** ✅ (§7–§8). Tabla 2 y las 3 columnas OLS de Tablas 4–5 reproducidas al 4.º decimal; conversión horaria validada (H18).
-- **Fase 3 — Réplica "tal cual el paquete" (hora UTC): ZINB.** Estimar el ZINB en Python y reproducir la col. ZINB de Tablas 4–5; cerrar D2 (fórmula del AME) y D3 (variante de SE/estrellas). Entorno `uv` listo (§2): `statsmodels 0.15.0` y `scipy 1.18.1` instalados y probados.
+- **Fase 3 — Réplica "tal cual el paquete" (hora UTC): ZINB.** Estimar el ZINB en Python y reproducir la col. ZINB de Tablas 4–5; cerrar D2 (fórmula del AME) y D3 (variante de SE/estrellas). Entorno `uv` listo (§2). **Hecho:** lectura de datos, regresores, panel, Tabla 2 y columnas de distancia de Tablas 4–5 (código en el paquete, `scripts/01_*` y `02_*`, pruebas de validación). **Falta:** `models/zinb.py`, efectos marginales del ZINB y sus pruebas.
 - **Fase 4 — Inferencia:** SE con cluster por comuna, estrellas, Moran's I, Cameron–Trivedi, π.
 - **Fase 5 — Sensibilidad en hora local (D1, punto 2):** solo conteos, horas locales 7–19; comparar contra la versión publicada restringida a las mismas horas.
 - **Fase 6 — Solicitud a los autores (D1, punto 3):** en paralelo desde ya; no bloquea las fases 3–5.

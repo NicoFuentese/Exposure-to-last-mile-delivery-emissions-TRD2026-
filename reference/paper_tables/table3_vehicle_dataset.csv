@@ -1,0 +1,8 @@
+description,value
+avg_delivery_vehicles_per_day,3345.74
+avg_firms_per_day,334.23
+avg_gps_points_per_day,5023366.51
+analysis_period_wednesdays,41
+avg_distance_per_vehicle_per_day_km,100.88
+avg_gps_points_per_vehicle_per_day,802.29
+p90_time_between_pings_min,5.45

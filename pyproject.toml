@@ -1,0 +1,28 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "lastmile-exposure"
+version = "0.1.0"
+description = "Réplica de Basso et al. (2026), Transportation Research Part D 155, 105296"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.12"
+# Las dependencias se gestionan en requirements.txt (versiones fijadas, ver README).
+dependencies = []
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/lastmile_exposure"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+src = ["src", "tests", "scripts"]
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]

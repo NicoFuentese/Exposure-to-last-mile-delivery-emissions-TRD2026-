@@ -8,21 +8,31 @@ El paper cruza, en una grilla **hexágono H3 (res. 9) × hora**, la actividad de
 
 > **Estado:** proyecto en curso. El detalle metodológico, los hallazgos y las decisiones abiertas están en [`AGENTS.md`](AGENTS.md), que es la referencia de trabajo.
 
-## Contenido
+## Estructura del Proyecto
 
 ```
 .
 ├── AGENTS.md            # Guía de trabajo: metodología verificada, hallazgos, decisiones, plan
 ├── CLAUDE.md            # Importa AGENTS.md para Claude Code
 ├── README.md
+├── pyproject.toml       # Paquete y configuración de pytest/ruff (sin dependencias)
 ├── requirements.txt     # Dependencias con versiones fijadas (Python 3.12)
 ├── LICENSE              # MIT
+├── src/lastmile_exposure/   # Código de la réplica, un módulo por concepto del paper
+├── reference/paper_tables/  # Cifras publicadas (Tablas 2–5) para validar la réplica
+├── docs/paper_map.md    # Índice: dónde está cada ecuación, tabla y figura
+├── scripts/             # Puntos de entrada por fase (delgados)
+├── tests/               # Pruebas, incluida la validación contra el paper
+├── notebooks/           # Solo exploración
+├── outputs/             # Resultados generados. No se versiona
 ├── .venv/               # Entorno virtual (uv). No se versiona
 └── data/                # Datos y paper. NO se versiona (confidencial)
     ├── Basso2026TRD.pdf
     ├── TRD_replication_share.zip        # Paquete de los autores (código R + bases)
     └── replication_package/             # El zip extraído
 ```
+
+**¿Buscas una fórmula o un paso?** Empieza por [`docs/paper_map.md`](docs/paper_map.md): mapea cada ecuación, tabla y figura del paper a su módulo.
 
 ## Requisitos
 
@@ -54,6 +64,7 @@ Desde la raíz del repositorio:
 ```bash
 uv venv --python 3.12 .venv
 uv pip install --python .venv -r requirements.txt
+uv pip install --python .venv -e . --no-deps      # instala el paquete lastmile_exposure (editable)
 ```
 
 ### Activarlo
@@ -105,6 +116,7 @@ deactivate                      # si estaba activo
 Remove-Item -Recurse -Force .venv
 uv venv --python 3.12 .venv
 uv pip install --python .venv -r requirements.txt
+uv pip install --python .venv -e . --no-deps      # instala el paquete lastmile_exposure (editable)
 ```
 
 ```bash
@@ -113,6 +125,7 @@ deactivate 2>/dev/null
 rm -rf .venv
 uv venv --python 3.12 .venv
 uv pip install --python .venv -r requirements.txt
+uv pip install --python .venv -e . --no-deps      # instala el paquete lastmile_exposure (editable)
 ```
 
 ### Comprobar que funciona
@@ -149,10 +162,22 @@ python -m zipfile -e data/TRD_replication_share.zip data/replication_package
 
 El paquete incluye las bases finales de modelación y el código R original, pero **no** el GPS crudo ni los archivos diarios de distancia. Qué contiene cada archivo, sus estadísticas y sus limitaciones están en la sección 8 de [`AGENTS.md`](AGENTS.md).
 
+## Reproducir resultados
+
+Con el entorno activo y los datos en `data/replication_package/`:
+
+```bash
+python scripts/01_table2.py            # Tabla 2 (población flotante)
+python scripts/02_distance_tables.py   # columnas de distancia de las Tablas 4 y 5
+```
+
+Cada script escribe sus tablas en `outputs/as_published/tables/`, las compara celda a celda con las cifras publicadas (`reference/paper_tables/`) y termina con código 1 si alguna difiere del paper más de su redondeo. El mapa de qué está reproducido y dónde vive cada fórmula está en [`docs/paper_map.md`](docs/paper_map.md).
+
 ## Desarrollo
 
 ```bash
-pytest            # pruebas (aún no hay; se irán agregando contra las Tablas 2, 4 y 5)
+pytest            # constantes, estructura, modelos sintéticos y validación contra las Tablas 2, 4 y 5
+                  # (las pruebas que usan datos confidenciales se saltan solas si no están)
 ruff check .      # lint
 ruff format .     # formato
 ```
@@ -164,13 +189,14 @@ ruff format .     # formato
 | Comprensión del paper y guía de trabajo (`AGENTS.md`) | ✅ |
 | Análisis del paquete de los autores y de los datos | ✅ |
 | Entorno de trabajo (`uv`, `requirements.txt`) | ✅ |
-| Réplica tal cual el paquete (hora UTC): ZINB y comparación con la Tabla 4/5 | ⏳ |
+| Tabla 2 y columnas de distancia (OLS) de las Tablas 4 y 5, tal cual el paquete | ✅ |
+| Columna ZINB de las Tablas 4 y 5 | ⏳ |
 | Inferencia: errores con cluster por comuna, estrellas, Moran's I | ⏳ |
 | Sensibilidad en hora local (`America/Santiago`) | ⏳ |
 | Figuras (1, 2, 6–10) | ⏳ |
 | Extensión a métricas de ruido | ⏳ |
 
-Ya están reproducidos exactamente la **Tabla 2** y las tres columnas de distancia (OLS) de las **Tablas 4 y 5**. Los detalles, incluidas las diferencias entre el paper y el código de los autores (por ejemplo, que la hora de los conteos de vehículos está en UTC), están en `AGENTS.md`.
+Ya están reproducidos exactamente, con código en el paquete y scripts ejecutables, la **Tabla 2** y las tres columnas de distancia (OLS) de las **Tablas 4 y 5**. Los detalles, incluidas las diferencias entre el paper y el código de los autores (por ejemplo, que la hora de los conteos de vehículos está en UTC), están en `AGENTS.md`.
 
 ## Licencia
 
