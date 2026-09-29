@@ -42,7 +42,8 @@ Si añades información nueva, etiquétala igual. Si algo del paper no está aqu
 ## 2. Stack
 
 - **Python** es el lenguaje de la réplica. R solo para un caso puntual y justificado (p. ej. contrastar el ZINB); no complicarlo.
-- `[Datos 2026-09-29]` Entorno: Python 3.12.3. Instalados: `pandas 3.0.5`, `numpy 2.5.2`, `matplotlib 3.11.1`, `h3 4.5.0` (API v4: `h3.latlng_to_cell`, no `geo_to_h3`). **No instalados** (y previsiblemente necesarios): `statsmodels` (ZINB, OLS, errores con cluster), `scipy` (Wasserstein, tests), `geopandas`/`shapely`/`pyproj` (recortar trayectorias por hexágono, medir metros, comunas), `libpysal`+`esda` (Moran's I).
+- **Entorno virtual con `uv`** (decisión del usuario, en lugar de `venv`): `uv` 0.11.23, entorno en `.venv/` (ignorado por git), Python 3.12. Dependencias en `requirements.txt` con versiones fijadas. Crear/recrear: `uv venv --python 3.12 .venv` y `uv pip install --python .venv -r requirements.txt`. Ejecutar con `.venv/Scripts/python.exe` (Windows). El Python del sistema **no** tiene las librerías de modelación: usar siempre el `.venv`. Añadir una dependencia = editar `requirements.txt` (con versión fijada) e instalarla con `uv pip`; no instalar nada en el Python global.
+- `[Verificado 2026-09-29]` Versiones: `numpy 2.5.3`, `pandas 3.0.6`, `pyarrow 25.0.1`, `scipy 1.18.1`, `statsmodels 0.15.0`, `h3 4.5.0` (API v4: `h3.latlng_to_cell`, no `geo_to_h3`), `shapely 2.1.2`, `pyproj 3.8.0`, `geopandas 1.2.0`, `libpysal 4.15.0`, `esda 2.10.0`, `matplotlib 3.11.2`, `tzdata 2026.4`, y de desarrollo `pytest 9.1.1`, `ruff 0.16.9`, `ipykernel 7.3.0`. Pruebas de humo superadas: ZINB con errores por cluster (`ZeroInflatedNegativeBinomialP`, inflación constante), logit y OLS con cluster, H3 res. 9, offset de `America/Santiago`, GeoDataFrame → EPSG:32719, Moran (`esda`), parquet, Wasserstein. La primera importación en un entorno recién creado en Windows tarda minutos; es normal.
 - Distancias en metros: proyectar a un CRS métrico (p. ej. WGS 84 / UTM 19S, EPSG:32719 `[Supuesto]`, a confirmar con el usuario) antes de medir longitudes.
 
 ---
@@ -363,7 +364,7 @@ Regresores `X` (11): `genero_masc, gse_c1a, gse_c1b, gse_c2, gse_c3, gse_de (= g
 - **Fase 0 — Comprensión del paper:** ✅ (2026-09-29).
 - **Fase 1 — AGENTS.md:** ✅ (verificado contra la capa de texto del PDF y contra el replication package).
 - **Fase 2 — Análisis del paquete y datos:** ✅ (§7–§8). Tabla 2 y las 3 columnas OLS de Tablas 4–5 reproducidas al 4.º decimal; conversión horaria validada (H18).
-- **Fase 3 — Réplica "tal cual el paquete" (hora UTC): ZINB.** Estimar el ZINB en Python y reproducir la col. ZINB de Tablas 4–5; cerrar D2 (fórmula del AME) y D3 (variante de SE/estrellas). ⏳ **Requiere instalar `statsmodels`/`scipy`: pendiente del OK explícito del usuario.**
+- **Fase 3 — Réplica "tal cual el paquete" (hora UTC): ZINB.** Estimar el ZINB en Python y reproducir la col. ZINB de Tablas 4–5; cerrar D2 (fórmula del AME) y D3 (variante de SE/estrellas). Entorno `uv` listo (§2): `statsmodels 0.15.0` y `scipy 1.18.1` instalados y probados.
 - **Fase 4 — Inferencia:** SE con cluster por comuna, estrellas, Moran's I, Cameron–Trivedi, π.
 - **Fase 5 — Sensibilidad en hora local (D1, punto 2):** solo conteos, horas locales 7–19; comparar contra la versión publicada restringida a las mismas horas.
 - **Fase 6 — Solicitud a los autores (D1, punto 3):** en paralelo desde ya; no bloquea las fases 3–5.

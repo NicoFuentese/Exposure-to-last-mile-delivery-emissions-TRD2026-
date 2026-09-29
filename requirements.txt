@@ -1,0 +1,32 @@
+# Entorno de la réplica de Basso et al. (2026). Gestionado con uv (ver AGENTS.md §2).
+# Python 3.12. Versiones fijadas (resueltas y probadas el 2026-09-29); las dependencias
+# transitivas las resuelve uv.
+#
+#   uv venv --python 3.12 .venv
+#   uv pip install --python .venv -r requirements.txt
+
+# --- Núcleo numérico y datos ---
+numpy==2.5.3
+pandas==3.0.6
+pyarrow==25.0.1        # parquet/IO rápido para los paneles intermedios
+scipy==1.18.1          # Wasserstein, tests, distribuciones
+tzdata==2026.4         # base de zonas horarias (America/Santiago) también en Windows
+
+# --- Modelos econométricos ---
+statsmodels==0.15.0    # ZINB, logit, OLS, errores estándar con cluster por comuna
+
+# --- Espacial ---
+h3==4.5.0              # API v4 (latlng_to_cell); grilla H3 resolución 9
+shapely==2.1.2
+pyproj==3.8.0
+geopandas==1.2.0       # polígonos de hexágonos, mapas, recortes por hexágono
+libpysal==4.15.0       # matrices de pesos espaciales
+esda==2.10.0           # Moran's I
+
+# --- Gráficos ---
+matplotlib==3.11.2
+
+# --- Desarrollo ---
+pytest==9.1.1          # validación contra las Tablas 2, 4 y 5 del paper
+ruff==0.16.9           # lint y formato
+ipykernel==7.3.0       # exploración en notebooks
