@@ -22,8 +22,8 @@
 
 | Paper | Qué es | Módulo | Estado |
 |---|---|---|---|
-| Ec. (1)–(3) | ZINB, inflación constante, NB2 | `models/zinb.py` | ⏳ |
-| Ec. (4) | Efecto marginal del ZINB | `models/marginal_effects.py` | ⏳ (H10) |
+| Ec. (1)–(3) | ZINB, inflación constante, NB2 | `models/zinb.py` | ✅ reproduce la col. ZINB dentro de la tolerancia del optimizador (H21–H23) |
+| Ec. (4) | Efecto marginal del ZINB | `models/marginal_effects.py` | ✅ tres fórmulas; `authors` = `eq4` porque π̂ ≈ 0 (H10, H21) |
 | Ec. (5)–(6) | OLS de `K̃` y `log K̃` | `models/ols.py` | ✅ Tablas 4–5, cols. 2 y 4 (H8) |
 | Tablas 4–5, col. 3 | "OLS `K̃>0`" = logit + OLS | `models/two_part.py` | ✅ (H7) |
 
@@ -41,7 +41,7 @@
 | Paper | Qué es | Módulo | Estado |
 |---|---|---|---|
 | Tabla 2 | Descriptivos de la población flotante | `reporting/table2.py` | ✅ (H15); `scripts/01_table2.py`. Wasserstein pendiente (D10) |
-| Tablas 4 y 5 | Efectos marginales (4 columnas) | `reporting/marginal_tables.py` | 🟡 3 de 4 columnas (falta ZINB) y sin estrellas; `scripts/02_distance_tables.py` |
+| Tablas 4 y 5 | Efectos marginales (4 columnas) | `reporting/marginal_tables.py` | 🟡 4 de 4 columnas, sin estrellas; `scripts/02_distance_tables.py` y `03_zinb_tables.py` |
 | Figs. 1, 2 | Mapas de población por GSE y de pings | `figures/maps.py` | ⏳ |
 | Figs. 6, 8, 9, 10 | Efectos marginales por GSE/edad | `figures/marginal_effects.py` | ⏳ |
 | Fig. 7 | Gramos de NOx/PM | `reporting/emissions.py` | ⏳ (D10) |
@@ -55,6 +55,7 @@ Las cifras publicadas están en [`reference/paper_tables/`](../reference/paper_t
 |---|---|---|
 | Tabla 2 (62 celdas) | `python scripts/01_table2.py` | ✅ todas dentro del redondeo del paper |
 | Tablas 4 y 5, columnas de distancia (39 + 39 celdas) | `python scripts/02_distance_tables.py` | ✅ diferencia máxima 5·10⁻⁵ (4 decimales) |
+| Tablas 4 y 5, columna ZINB (13 + 13 celdas) | `python scripts/03_zinb_tables.py` (~2 min) | ✅ dif. máx. 0,0032 (T4) y 0,0321 (T5); mismos signos; criterio relativo 1 % con piso 0,005 (D2, acordado) |
 
 ## Convención de documentación
 

@@ -34,3 +34,23 @@ def distance_tables():
         "dynamic": distance_marginal_table(distance_frame()),
         "static": distance_marginal_table(distance_frame(static=True)),
     }
+
+
+@pytest.fixture(scope="session")
+def zinb_dynamic():
+    """ZINB ajustado sobre la base dinámica completa (~1 min); se ajusta una sola vez."""
+    _require_data()
+    from lastmile_exposure.models.zinb import fit_zinb
+    from lastmile_exposure.panel import count_frame
+
+    return fit_zinb(count_frame())
+
+
+@pytest.fixture(scope="session")
+def zinb_static():
+    """ZINB ajustado con la demografía estática (~1 min); se ajusta una sola vez."""
+    _require_data()
+    from lastmile_exposure.models.zinb import fit_zinb
+    from lastmile_exposure.panel import count_frame
+
+    return fit_zinb(count_frame(static=True))

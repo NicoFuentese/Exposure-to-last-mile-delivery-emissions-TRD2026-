@@ -169,6 +169,7 @@ Con el entorno activo y los datos en `data/replication_package/`:
 ```bash
 python scripts/01_table2.py            # Tabla 2 (población flotante)
 python scripts/02_distance_tables.py   # columnas de distancia de las Tablas 4 y 5
+python scripts/03_zinb_tables.py        # columna ZINB de las Tablas 4 y 5 (~2 min)
 ```
 
 Cada script escribe sus tablas en `outputs/as_published/tables/`, las compara celda a celda con las cifras publicadas (`reference/paper_tables/`) y termina con código 1 si alguna difiere del paper más de su redondeo. El mapa de qué está reproducido y dónde vive cada fórmula está en [`docs/paper_map.md`](docs/paper_map.md).
@@ -177,6 +178,7 @@ Cada script escribe sus tablas en `outputs/as_published/tables/`, las compara ce
 
 ```bash
 pytest            # constantes, estructura, modelos sintéticos y validación contra las Tablas 2, 4 y 5
+pytest -m "not slow"   # omite los ajustes ZINB completos sobre datos reales (minutos)
                   # (las pruebas que usan datos confidenciales se saltan solas si no están)
 ruff check .      # lint
 ruff format .     # formato
@@ -190,13 +192,13 @@ ruff format .     # formato
 | Análisis del paquete de los autores y de los datos | ✅ |
 | Entorno de trabajo (`uv`, `requirements.txt`) | ✅ |
 | Tabla 2 y columnas de distancia (OLS) de las Tablas 4 y 5, tal cual el paquete | ✅ |
-| Columna ZINB de las Tablas 4 y 5 | ⏳ |
+| Columna ZINB de las Tablas 4 y 5 (dentro de la tolerancia del optimizador) | ✅ |
 | Inferencia: errores con cluster por comuna, estrellas, Moran's I | ⏳ |
 | Sensibilidad en hora local (`America/Santiago`) | ⏳ |
 | Figuras (1, 2, 6–10) | ⏳ |
 | Extensión a métricas de ruido | ⏳ |
 
-Ya están reproducidos exactamente, con código en el paquete y scripts ejecutables, la **Tabla 2** y las tres columnas de distancia (OLS) de las **Tablas 4 y 5**. Los detalles, incluidas las diferencias entre el paper y el código de los autores (por ejemplo, que la hora de los conteos de vehículos está en UTC), están en `AGENTS.md`.
+Ya están reproducidos, con código en el paquete y scripts ejecutables, la **Tabla 2** y las tres columnas de distancia (OLS) de las **Tablas 4 y 5** (al redondeo del paper), y la columna **ZINB** (dentro de la tolerancia del optimizador: ni R/`pscl` la reproduce al 4.º decimal). Los detalles, incluidas las diferencias entre el paper y el código de los autores (por ejemplo, que la hora de los conteos de vehículos está en UTC), están en `AGENTS.md`.
 
 ## Licencia
 

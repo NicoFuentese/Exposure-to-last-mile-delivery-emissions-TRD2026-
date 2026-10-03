@@ -124,3 +124,21 @@ def test_compare_columns_flags_missing_and_nan_cells():
     # Si el paper no reporta la celda (NaN), se omite
     ref_nan = pd.DataFrame({"variable": ["a", "b"], "x": [1.0, float("nan")]})
     assert len(compare_columns(nan, ref_nan, {"x": 1e-4})) == 1
+
+
+def test_relative_tolerance_scales_with_the_paper_value_and_has_a_floor():
+    """El criterio acordado para el ZINB: máx(0,005; 1 % × |valor del paper|)."""
+    from lastmile_exposure.validation.paper_tables import ZINB_TOLERANCE, Tolerance, compare_columns
+
+    assert ZINB_TOLERANCE == Tolerance(absolute=0.005, relative=0.01)
+    assert ZINB_TOLERANCE.limit(14.2813) == pytest.approx(0.142813)  # relativo manda
+    assert ZINB_TOLERANCE.limit(0.313) == pytest.approx(0.005)  # manda el piso
+
+    reference = pd.DataFrame({"variable": ["big", "small"], "x": [14.2813, 0.4997]})
+    # 0,03 de error: dentro del 1 % del valor grande, fuera del piso del valor pequeño
+    computed = pd.DataFrame({"variable": ["big", "small"], "x": [14.2813 - 0.03, 0.4997 + 0.03]})
+    report = compare_columns(computed, reference, {"x": ZINB_TOLERANCE})
+    assert report["ok"].tolist() == [True, False]
+    assert report["limit"].tolist() == pytest.approx([0.142813, 0.005])
+    # un número simple sigue siendo una tolerancia absoluta
+    assert compare_columns(computed, reference, {"x": 0.05})["ok"].tolist() == [True, True]

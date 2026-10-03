@@ -19,6 +19,7 @@ PACKAGE_DIR = DATA_DIR / "replication_package"  # zip de los autores, extraído
 PROCESSED_DIR = DATA_DIR / "processed"  # datos derivados (ignorado por git)
 OUTPUTS_DIR = ROOT / "outputs"  # resultados; ignorado por git por defecto
 REFERENCE_DIR = ROOT / "reference" / "paper_tables"  # cifras publicadas (sí se versionan)
+R_ORACLE_DIR = ROOT / "reference" / "r_oracle"  # contraste del ZINB con pscl (R); no es del paper
 
 
 class Variant(StrEnum):

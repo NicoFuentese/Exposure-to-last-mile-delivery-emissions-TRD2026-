@@ -9,13 +9,32 @@ Estado: implementado (Fase 3). Compara valores; la comparación de estrellas se 
 Las cifras viven en `reference/paper_tables/*.csv` (ver su README).
 """
 
+from dataclasses import dataclass
+
 import pandas as pd
 
 from lastmile_exposure import config
 
+
+@dataclass(frozen=True)
+class Tolerance:
+    """Tolerancia de comparación: máx(absoluta, relativa × |valor del paper|)."""
+
+    absolute: float = 0.0
+    relative: float = 0.0
+
+    def limit(self, paper_value: float) -> float:
+        return max(self.absolute, self.relative * abs(paper_value))
+
+
 # Tolerancia absoluta según la precisión con que el paper imprime cada cifra.
 TABLE2_TOLERANCES = {"mean": 0.006, "std": 0.006, "mean_pct": 0.051, "std_pct": 0.051}
-MARGINAL_TOLERANCE = 6e-5  # el paper imprime 4 decimales
+MARGINAL_TOLERANCE = 6e-5  # el paper imprime 4 decimales (columnas OLS)
+# ZINB: la columna del paper depende de dónde detuvo su búsqueda el optimizador (la verosimilitud es
+# casi plana, π → 0); ni R/pscl la reproduce al 4.º decimal (dif. máx. 0,0038). Criterio ACORDADO
+# con el usuario (2026-10-03, AGENTS.md D2): error relativo de 1 % con un piso de 0,005 para los
+# coeficientes cercanos a cero. Detecta fórmulas equivocadas (desvíos > 1).
+ZINB_TOLERANCE = Tolerance(absolute=0.005, relative=0.01)
 
 
 def load_reference(name: str, *, text_stars: bool = False) -> pd.DataFrame:
@@ -42,12 +61,14 @@ def load_table5() -> pd.DataFrame:
 def compare_columns(
     computed: pd.DataFrame,
     reference: pd.DataFrame,
-    tolerances: dict[str, float],
+    tolerances: dict[str, float | Tolerance],
     key: str = "variable",
 ) -> pd.DataFrame:
     """Compara `computed` con `reference` columna a columna y devuelve un informe largo.
 
-    Columnas del informe: `variable`, `column`, `computed`, `paper`, `abs_diff`, `ok`.
+    Cada tolerancia es un número (error absoluto máximo) o un `Tolerance` (absoluta y/o relativa
+    al valor del paper). Columnas del informe: `variable`, `column`, `computed`, `paper`,
+    `abs_diff`, `limit` (el máximo permitido para esa celda) y `ok`.
     - Las celdas que el paper no reporta (NaN en `reference`) se omiten.
     - Si la réplica deja NaN donde el paper sí tiene valor, la celda queda `ok=False`
       (nunca se omite en silencio).
@@ -59,11 +80,13 @@ def compare_columns(
     merged = computed.merge(reference, on=key, suffixes=("_computed", "_paper"))
     rows = []
     for col, tol in tolerances.items():
+        tolerance = tol if isinstance(tol, Tolerance) else Tolerance(absolute=float(tol))
         for _, r in merged.iterrows():
             mine, paper = r[f"{col}_computed"], r[f"{col}_paper"]
             if pd.isna(paper):
                 continue
             diff = float("nan") if pd.isna(mine) else abs(float(mine) - float(paper))
+            limit = tolerance.limit(float(paper))
             rows.append(
                 {
                     key: r[key],
@@ -71,7 +94,19 @@ def compare_columns(
                     "computed": float(mine),
                     "paper": float(paper),
                     "abs_diff": diff,
-                    "ok": bool(diff <= tol),  # NaN <= tol es False
+                    "limit": limit,
+                    "ok": bool(diff <= limit),  # NaN <= limit es False
                 }
             )
-    return pd.DataFrame(rows, columns=[key, "column", "computed", "paper", "abs_diff", "ok"])
+    columns = [key, "column", "computed", "paper", "abs_diff", "limit", "ok"]
+    return pd.DataFrame(rows, columns=columns)
+
+
+def load_pscl_oracle(tag: str) -> pd.Series:
+    """Parámetros del ZINB estimado con `pscl` (R) para `tag` = "dynamic" | "static".
+
+    Índice: `inflate_const`, `const`, los 11 regresores, `alpha` (= 1/θ), `loglik` y
+    `ame_authors:<regresor>`. No son cifras del paper (ver `reference/r_oracle/README.md`).
+    """
+    df = pd.read_csv(config.R_ORACLE_DIR / f"zinb_pscl_{tag}.csv")
+    return df.set_index("name")["value"]
