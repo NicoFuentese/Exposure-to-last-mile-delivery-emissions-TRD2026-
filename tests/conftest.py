@@ -54,3 +54,12 @@ def zinb_static():
     from lastmile_exposure.panel import count_frame
 
     return fit_zinb(count_frame(static=True))
+
+
+@pytest.fixture(scope="session")
+def daily_counts():
+    """Los 42 archivos diarios de conteos (horas 7-22, UTC); se leen una sola vez."""
+    _require_data()
+    from lastmile_exposure.io.daily_counts import load_daily_counts
+
+    return load_daily_counts()

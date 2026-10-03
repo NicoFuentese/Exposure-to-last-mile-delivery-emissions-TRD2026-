@@ -12,7 +12,7 @@
 | §3.1 (EF_c) | Factor de expansión por comuna | (viene aplicado en el panel; no se recalcula) | 🚫 |
 | §5.2 | Demografía estática (`datosxhexagono.csv`) | `io/static.py`, `demographics/static.py` | ✅ (H8) |
 | §3.2, Tabla 3 | GPS de vehículos | `io/gps.py` | ⏳ (solo 1 día) |
-| §4.1.1, Fig. 4 | Conteo `Y_hi` y mediana `Ỹ_hi` | `exposure/vehicles_counts.py`, `exposure/aggregate.py` | ⏳ verificado en exploración (la mediana sobre días presentes reproduce el 100 %, H2), **sin código todavía**; hoy se usan las medianas ya calculadas del paquete |
+| §4.1.1, Fig. 4 | Conteo `Y_hi` y mediana `Ỹ_hi` | `exposure/vehicles_counts.py`, `exposure/aggregate.py` | ✅ la mediana desde los 42 archivos diarios es **idéntica** a la del paper (H2); `scripts/04_median_counts.py`. `Y_hi` por día desde el GPS crudo: 🚫 |
 | §4.1.2, Fig. 5 | Distancia `K_hi` y mediana `K̃_hi` | `exposure/vehicles_distance.py` | 🚫 faltan distancias diarias (H4, D7) |
 | §4, Fig. 3 | Fusión hexágono‑hora | `panel.py` | ✅ sobre las bases finales del paquete; 🚫 desde el GPS crudo (D7) |
 | §3.2 / H1 | UTC → `America/Santiago` | `timeutils/local_time.py` | ⏳ verificada en exploración (H18), **sin código todavía** (Fase 5) |
@@ -55,6 +55,7 @@ Las cifras publicadas están en [`reference/paper_tables/`](../reference/paper_t
 |---|---|---|
 | Tabla 2 (62 celdas) | `python scripts/01_table2.py` | ✅ todas dentro del redondeo del paper |
 | Tablas 4 y 5, columnas de distancia (39 + 39 celdas) | `python scripts/02_distance_tables.py` | ✅ diferencia máxima 5·10⁻⁵ (4 decimales) |
+| Mediana de conteos (178.304 filas × 2 columnas) | `python scripts/04_median_counts.py` (~1 min) | ✅ igualdad exacta con la base del paper |
 | Tablas 4 y 5, columna ZINB (13 + 13 celdas) | `python scripts/03_zinb_tables.py` (~2 min) | ✅ dif. máx. 0,0032 (T4) y 0,0321 (T5); mismos signos; criterio relativo 1 % con piso 0,005 (D2, acordado) |
 
 ## Convención de documentación

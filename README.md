@@ -170,6 +170,7 @@ Con el entorno activo y los datos en `data/replication_package/`:
 python scripts/01_table2.py            # Tabla 2 (población flotante)
 python scripts/02_distance_tables.py   # columnas de distancia de las Tablas 4 y 5
 python scripts/03_zinb_tables.py        # columna ZINB de las Tablas 4 y 5 (~2 min)
+python scripts/04_median_counts.py      # mediana de conteos desde los 42 archivos diarios (~1 min)
 ```
 
 Cada script escribe sus tablas en `outputs/as_published/tables/`, las compara celda a celda con las cifras publicadas (`reference/paper_tables/`) y termina con código 1 si alguna difiere del paper más de su redondeo. El mapa de qué está reproducido y dónde vive cada fórmula está en [`docs/paper_map.md`](docs/paper_map.md).
@@ -193,6 +194,7 @@ ruff format .     # formato
 | Entorno de trabajo (`uv`, `requirements.txt`) | ✅ |
 | Tabla 2 y columnas de distancia (OLS) de las Tablas 4 y 5, tal cual el paquete | ✅ |
 | Columna ZINB de las Tablas 4 y 5 (dentro de la tolerancia del optimizador) | ✅ |
+| Mediana de conteos reconstruida desde los archivos diarios (idéntica al paper) | ✅ |
 | Inferencia: errores con cluster por comuna, estrellas, Moran's I | ⏳ |
 | Sensibilidad en hora local (`America/Santiago`) | ⏳ |
 | Figuras (1, 2, 6–10) | ⏳ |
