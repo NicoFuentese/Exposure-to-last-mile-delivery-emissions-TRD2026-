@@ -93,3 +93,34 @@ TABLE_ROWS = (
     ("gse_c3", "C3", "seg"),
     ("gse_de", "D+E", "seg"),
 )
+
+# --- Grupos de la Tabla 2 y ventanas de la movilidad (Wasserstein) ---------------------------
+# (etiqueta del paper, columna del panel, dimensión), en el orden de la Tabla 2
+TABLE2_GROUPS = (
+    ("Male", "genero_masc", "sex"),
+    ("Female", "genero_fem", "sex"),
+    ("Under 25", "edad_menor_25", "age"),
+    ("25-34", "edad_25_34", "age"),
+    ("35-44", "edad_35_44", "age"),
+    ("45-54", "edad_45_54", "age"),
+    ("55-64", "edad_55_64", "age"),
+    ("65+", "edad_mayor_65", "age"),
+    ("AB", "gse_ab", "seg"),
+    ("C1a", "gse_c1a", "seg"),
+    ("C1b", "gse_c1b", "seg"),
+    ("C2", "gse_c2", "seg"),
+    ("C3", "gse_c3", "seg"),
+    ("D", "gse_d", "seg"),
+    ("E", "gse_e", "seg"),
+)
+DIMENSION_OF = {label: dimension for label, _, dimension in TABLE2_GROUPS}
+# Ventanas de la mañana (10-12 h) y la tarde (20-22 h) [P §3.1]; el código de los autores las usa
+# INCLUSIVAS (`hora >= 10 & hora <= 12`, `morning_range <- c(10, 12)` en heatmaps_to_latex.R).
+MORNING_HOURS = (10, 11, 12)
+EVENING_HOURS = (20, 21, 22)
+METRIC_CRS = (
+    "EPSG:32719"  # WGS 84 / UTM 19S: coordenadas en metros para medir distancias [Supuesto]
+)
+MOBILITY_DIR = (
+    ROOT / "reference" / "mobility"
+)  # W1 calculada por nosotros (no son cifras del paper)

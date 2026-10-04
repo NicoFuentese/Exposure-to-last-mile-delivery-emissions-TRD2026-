@@ -23,6 +23,9 @@ geopandas==1.2.0       # polígonos de hexágonos, mapas, recortes por hexágono
 libpysal==4.15.0       # matrices de pesos espaciales
 esda==2.10.0           # Moran's I
 
+# --- Transporte óptimo (distancia de Wasserstein, Tabla 2) ---
+pot==0.9.7.post1      # EMD exacto (Python Optimal Transport); solo núcleo, sin torch
+
 # --- Gráficos ---
 matplotlib==3.11.2
 

@@ -40,7 +40,8 @@
 
 | Paper | Qué es | Módulo | Estado |
 |---|---|---|---|
-| Tabla 2 | Descriptivos de la población flotante | `reporting/table2.py` | ✅ (H15); `scripts/01_table2.py`. Wasserstein pendiente (D10) |
+| Tabla 2 | Descriptivos de la población flotante | `reporting/table2.py` | ✅ Mean/Std/% (H15); `scripts/01_table2.py` |
+| Tabla 2, Wasserstein y ranking | Movilidad mañana→tarde por grupo | `demographics/mobility.py` | 🟡 implementado como describe el paper; **no reproduce** los valores (error máx. 0,14; 12/15 rankings; H24); `scripts/05_mobility.py` |
 | Tablas 4 y 5 | Efectos marginales (4 columnas) | `reporting/marginal_tables.py` | 🟡 4 de 4 columnas, sin estrellas; `scripts/02_distance_tables.py` y `03_zinb_tables.py` |
 | Figs. 1, 2 | Mapas de población por GSE y de pings | `figures/maps.py` | ⏳ |
 | Figs. 6, 8, 9, 10 | Efectos marginales por GSE/edad | `figures/marginal_effects.py` | ⏳ |

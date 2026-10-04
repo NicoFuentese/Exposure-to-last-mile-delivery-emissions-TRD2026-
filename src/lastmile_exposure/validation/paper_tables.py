@@ -110,3 +110,12 @@ def load_pscl_oracle(tag: str) -> pd.Series:
     """
     df = pd.read_csv(config.R_ORACLE_DIR / f"zinb_pscl_{tag}.csv")
     return df.set_index("name")["value"]
+
+
+def load_mobility_reference() -> pd.Series:
+    """W1 en metros por grupo de la Tabla 2 calculada por nosotros (`reference/mobility/`).
+
+    No son cifras del paper y no reproducen los valores publicados (AGENTS.md H24).
+    """
+    df = pd.read_csv(config.MOBILITY_DIR / "wasserstein_w1_utm_pooled.csv")
+    return df.set_index("group")["w1_m"]
