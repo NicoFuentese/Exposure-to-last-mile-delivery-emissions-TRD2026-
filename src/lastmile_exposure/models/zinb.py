@@ -6,7 +6,7 @@ Código de los autores: `pscl::zeroinfl(vehicles ~ X | 1, dist = "negbin")` en
     summary_results.R
 Hallazgos (AGENTS.md §7): H10, H11, D2
 Estado: implementado (Fase 3). Estimación puntual y efectos marginales. Errores estándar con
-    cluster por comuna: pendientes (Fase 4).
+    cluster por comuna: `inference/zinb_sandwich.py` (Fase 4A).
 
 Modelo (NB2, mapeo con `statsmodels`): P(Ỹ=0) = π + (1−π)·f_NB(0; μ, θ) y
 P(Ỹ=y>0) = (1−π)·f_NB(y; μ, θ), con log μ = β0 + β'D y π CONSTANTE (Ec. 1–3).

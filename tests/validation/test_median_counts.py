@@ -71,3 +71,21 @@ def test_excluding_the_holiday_gives_41_wednesdays(panel, rebuilt):
     out = median_vehicles(daily_41, panel[["hex", "hour"]])
     assert out["count_wednesdays"].max() <= 41
     assert not np.array_equal(out["median_vehicles"], rebuilt["median_vehicles"])
+
+
+def test_data_base_counts_are_the_median_of_the_first_two_wednesdays(daily_counts, panel):
+    """H26: `00_out/data_base` (la copia que leen por defecto los scripts de los autores) NO es la
+    base del paper: su `median_vehicles` es exactamente la mediana de los dos primeros miércoles
+    (2024-01-03 y 2024-01-10) de los conteos diarios."""
+    path = config.PACKAGE_DIR / "00_out" / "data_base" / "hexagon_model_median_wednesdays_RM.csv"
+    data_base = pd.read_csv(path, usecols=["hex", "hour", "median_vehicles", "count_wednesdays"])
+    first_two = sorted(daily_counts["date"].unique())[:2]
+    assert [str(d.date()) for d in first_two] == ["2024-01-03", "2024-01-10"]
+    rebuilt = median_vehicles(
+        daily_counts[daily_counts["date"].isin(first_two)], panel[["hex", "hour"]]
+    )
+    merged = rebuilt.merge(data_base, on=["hex", "hour"], suffixes=("_rebuilt", "_data_base"))
+    assert len(merged) == config.N_HEXAGON_HOURS
+    assert (merged["median_vehicles_rebuilt"] == merged["median_vehicles_data_base"]).all()
+    assert (merged["count_wednesdays_rebuilt"] == merged["count_wednesdays_data_base"]).all()
+    assert data_base["count_wednesdays"].max() == 2

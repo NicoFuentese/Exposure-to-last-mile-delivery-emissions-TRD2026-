@@ -5,7 +5,7 @@ Código de los autores: rama `ziols` de `get_marginal_effects` en 02_estimation/
 Hallazgos (AGENTS.md §7): H7, H12
 Estado: implementado (Fase 3). Estimación puntual reproducida (22 celdas no nulas, diferencia
     máxima ≤ 5·10⁻⁵, el redondeo a 4 decimales del paper). El SE del AME del código original es
-    una aproximación burda y NO se replica todavía (Fase 4).
+    una aproximación burda; se replica tal cual en `inference/cluster.py` (Fase 4A).
 """
 
 from dataclasses import dataclass

@@ -3,8 +3,7 @@
 Paper: Tablas 2 a 5
 Código de los autores: (no aplica)
 Hallazgos (AGENTS.md §7): §7.2 (estado de la validación)
-Estado: implementado (Fase 3). Compara valores; la comparación de estrellas se añade con la
-    inferencia (Fase 4).
+Estado: implementado. Compara valores (Fase 3) y estrellas (`compare_stars`, Fase 4A).
 
 Las cifras viven en `reference/paper_tables/*.csv` (ver su README).
 """
@@ -102,6 +101,43 @@ def compare_columns(
     return pd.DataFrame(rows, columns=columns)
 
 
+STAR_COLUMNS = ("zinb", "ols_k", "ols_kpos", "ols_logk")
+_REFERENCE_ROWS = ("edad_mayor_65", "gse_ab")  # categorías omitidas: sin estrellas por definición
+
+
+def compare_stars(inference: pd.DataFrame, reference: pd.DataFrame) -> pd.DataFrame:
+    """Compara las estrellas de `reporting.significance.inference_table` con las del paper.
+
+    `reference` es `load_table4()` / `load_table5()`. Informe largo con una fila por celda no
+    referencial (44 por tabla): `variable`, `column`, `computed`, `paper`, `p` (p-valor calculado)
+    y `ok` (las estrellas coinciden exactamente). Es la medida que decide D3 (qué variante de
+    errores estándar generó las estrellas).
+    """
+    merged = inference.merge(reference, on="variable", suffixes=("_computed", "_paper"))
+    merged = merged[~merged["variable"].isin(_REFERENCE_ROWS)]
+    rows = []
+    for col in STAR_COLUMNS:
+        for _, r in merged.iterrows():
+            mine, paper = r[f"{col}_sig_computed"], r[f"{col}_sig_paper"]
+            rows.append(
+                {
+                    "variable": r["variable"],
+                    "column": col,
+                    "computed": mine,
+                    "paper": paper,
+                    "p": r[f"{col}_p"],
+                    "ok": bool(mine == paper),
+                }
+            )
+    return pd.DataFrame(rows, columns=["variable", "column", "computed", "paper", "p", "ok"])
+
+
+def stars_summary(report: pd.DataFrame) -> pd.DataFrame:
+    """Resumen de `compare_stars`: celdas con estrellas iguales y total, por columna."""
+    grouped = report.groupby("column")["ok"].agg(matches="sum", cells="count")
+    return grouped.reindex(list(STAR_COLUMNS)).astype(int)
+
+
 def load_pscl_oracle(tag: str) -> pd.Series:
     """Parámetros del ZINB estimado con `pscl` (R) para `tag` = "dynamic" | "static".
 
@@ -110,6 +146,16 @@ def load_pscl_oracle(tag: str) -> pd.Series:
     """
     df = pd.read_csv(config.R_ORACLE_DIR / f"zinb_pscl_{tag}.csv")
     return df.set_index("name")["value"]
+
+
+def load_cluster_se_oracle(tag: str) -> pd.DataFrame:
+    """Errores estándar con cluster por comuna calculados en R (`sandwich::vcovCL`), `tag` =
+    "dynamic" | "static". Índice: `(Intercept)` y los 11 regresores; columnas: `zinb_se_cluster`
+    (bloque de conteo de `vcovCL(zeroinfl)`), `zinb_se_iid`, `nb_se_cluster`, `ols_k_se_cluster`,
+    `ols_logk_se_cluster`, `ols_pos_se_cluster` y los coeficientes (`reference/r_oracle/`).
+    No son cifras del paper.
+    """
+    return pd.read_csv(config.R_ORACLE_DIR / f"cluster_se_{tag}.csv").set_index("name")
 
 
 def load_mobility_reference() -> pd.Series:

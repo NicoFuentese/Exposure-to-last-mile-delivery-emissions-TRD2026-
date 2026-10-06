@@ -57,6 +57,18 @@ def zinb_static():
 
 
 @pytest.fixture(scope="session")
+def model_frames():
+    """Marcos de modelación (conteo y distancia) dinámicos y estáticos, sin ajustar nada."""
+    _require_data()
+    from lastmile_exposure.panel import count_frame, distance_frame
+
+    return {
+        tag: {"count": count_frame(static=static), "distance": distance_frame(static=static)}
+        for tag, static in (("dynamic", False), ("static", True))
+    }
+
+
+@pytest.fixture(scope="session")
 def daily_counts():
     """Los 42 archivos diarios de conteos (horas 7-22, UTC); se leen una sola vez."""
     _require_data()

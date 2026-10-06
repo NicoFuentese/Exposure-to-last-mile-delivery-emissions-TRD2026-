@@ -4,8 +4,8 @@ Paper: Tablas 4 (dinámico, p.12) y 5 (estático, p.15)
 Código de los autores: `wide_effects` en 02_estimation/summary_results*.R
 Hallazgos (AGENTS.md §7): H7, H8, H10, H12
 Estado: implementado (Fase 3): las tres columnas de distancia (`ols_k`, `ols_kpos`, `ols_logk`)
-    con `distance_marginal_table` y la columna ZINB con `zinb_marginal_column`. Las estrellas de
-    significancia quedan para la inferencia (Fase 4).
+    con `distance_marginal_table` y la columna ZINB con `zinb_marginal_column`. Las estrellas
+    están en `reporting/significance.py` (Fase 4A).
 """
 
 import numpy as np

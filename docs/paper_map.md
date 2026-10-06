@@ -31,10 +31,10 @@
 
 | Paper | Qué es | Módulo | Estado |
 |---|---|---|---|
-| §4.2.3 | Errores estándar agrupados por comuna (51) | `inference/cluster.py` | ⏳ |
+| §4.2.3 | Errores estándar agrupados por comuna (51) | `inference/cluster.py`, `inference/zinb_sandwich.py` | ✅ SE validados contra R (≤ 1,5 %; H25); `scripts/06_inference.py` |
 | §4.2.3 | I de Moran (0,4694 / 0,4756) | `inference/moran.py` | ⏳ |
 | §4.2.1 | Cameron–Trivedi (7,73), π | `inference/dispersion.py` | ⏳ |
-| Tablas 4–5 | Estrellas de significancia | `reporting/significance.py` | ⏳ |
+| Tablas 4–5 | Estrellas de significancia | `reporting/significance.py` | 🟡 calculadas con 3 variantes sobre `00_data` (`paper_text` 50/88, `authors_script` 61/88, `iid`); **no todas coinciden** (H25, H26, D3). Diagnóstico aislado con `data_base` (**no es réplica**): `validation/stars_diagnosis.py`, `scripts/07_stars_diagnosis.py` |
 
 ## Resultados y figuras
 
@@ -42,7 +42,7 @@
 |---|---|---|---|
 | Tabla 2 | Descriptivos de la población flotante | `reporting/table2.py` | ✅ Mean/Std/% (H15); `scripts/01_table2.py` |
 | Tabla 2, Wasserstein y ranking | Movilidad mañana→tarde por grupo | `demographics/mobility.py` | 🟡 implementado como describe el paper; **no reproduce** los valores (error máx. 0,14; 12/15 rankings; H24); `scripts/05_mobility.py` |
-| Tablas 4 y 5 | Efectos marginales (4 columnas) | `reporting/marginal_tables.py` | 🟡 4 de 4 columnas, sin estrellas; `scripts/02_distance_tables.py` y `03_zinb_tables.py` |
+| Tablas 4 y 5 | Efectos marginales (4 columnas) | `reporting/marginal_tables.py` | 🟡 4 de 4 columnas con valores; estrellas calculadas pero no todas coinciden (H25); `scripts/02_distance_tables.py`, `03_zinb_tables.py` y `06_inference.py` |
 | Figs. 1, 2 | Mapas de población por GSE y de pings | `figures/maps.py` | ⏳ |
 | Figs. 6, 8, 9, 10 | Efectos marginales por GSE/edad | `figures/marginal_effects.py` | ⏳ |
 | Fig. 7 | Gramos de NOx/PM | `reporting/emissions.py` | ⏳ (D10) |

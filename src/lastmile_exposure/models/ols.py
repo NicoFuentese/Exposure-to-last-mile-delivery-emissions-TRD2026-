@@ -5,7 +5,8 @@ Código de los autores: `feols(distance ~ model_vars)` y `feols(log_distance ~ m
     02_estimation/summary_results*.R
 Hallazgos (AGENTS.md §7): H8, H12
 Estado: implementado (Fase 3). Estimaciones puntuales reproducidas exactamente (Tablas 4 y 5,
-    columnas OLS `K̃` y `log K̃`). Errores estándar con cluster por comuna: pendiente (Fase 4).
+    columnas OLS `K̃` y `log K̃`). Errores estándar con cluster por comuna:
+    `inference/cluster.py` (Fase 4A).
 """
 
 import numpy as np

@@ -24,7 +24,13 @@ from lastmile_exposure.io.static import load_static_raw
 _ID_COLUMNS = ["hex", "hour", "comuna"]
 
 
-def _with_regressors(outcome_df: pd.DataFrame, outcome: str, *, static: bool) -> pd.DataFrame:
+def attach_regressors(outcome_df: pd.DataFrame, outcome: str, *, static: bool) -> pd.DataFrame:
+    """Marco de modelación: `hex`, `hour`, `comuna`, `outcome` y los 11 regresores.
+
+    `outcome_df` trae `hex`, `hour`, `comuna`, `outcome` y, para el enfoque dinámico, la
+    demografía por hora (`gse_d` y `gse_e`, que se combinan en `gse_de`). Con `static=True` los
+    regresores se toman de `datosxhexagono.csv` (H8).
+    """
     if not static:
         df = add_gse_de(outcome_df)
         return df[[*_ID_COLUMNS, outcome, *config.REGRESSORS]].copy()
@@ -39,7 +45,7 @@ def _with_regressors(outcome_df: pd.DataFrame, outcome: str, *, static: bool) ->
 
 def distance_frame(*, static: bool = False) -> pd.DataFrame:
     """Marco de modelación de distancia: `median_distance` (K̃, metros) y regresores."""
-    return _with_regressors(load_distance_dataset(), config.OUTCOME_DISTANCE, static=static)
+    return attach_regressors(load_distance_dataset(), config.OUTCOME_DISTANCE, static=static)
 
 
 def count_frame(*, static: bool = False) -> pd.DataFrame:
@@ -50,4 +56,4 @@ def count_frame(*, static: bool = False) -> pd.DataFrame:
     """
     raw = load_counts_dataset()
     raw = raw.assign(vehicles=np.round(raw[config.OUTCOME_COUNT]))
-    return _with_regressors(raw, "vehicles", static=static)
+    return attach_regressors(raw, "vehicles", static=static)
