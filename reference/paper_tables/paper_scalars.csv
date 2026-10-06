@@ -1,0 +1,4 @@
+name,value,pages,description
+cameron_trivedi_dispersion,7.73,10-11,"Parámetro de dispersión del test de Cameron-Trivedi sobre el Poisson (§4.2.1): 'significantly greater than 1', p < 0.001"
+moran_i_distance,0.4694,11-12,"I de Moran promedio simple entre horas para la distancia K̃ (§4.2.3); matriz de pesos no especificada"
+moran_i_vehicles,0.4756,11-12,"I de Moran promedio simple entre horas para el conteo de vehículos Ỹ (§4.2.3); matriz de pesos no especificada"

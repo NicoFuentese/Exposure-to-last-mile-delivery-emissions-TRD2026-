@@ -173,6 +173,7 @@ python scripts/03_zinb_tables.py        # columna ZINB de las Tablas 4 y 5 (~2 m
 python scripts/04_median_counts.py      # mediana de conteos desde los 42 archivos diarios (~1 min)
 python scripts/05_mobility.py --use-reference   # Wasserstein/movilidad (Tabla 2); sin la bandera tarda ~10 min
 python scripts/06_inference.py          # SE por comuna y estrellas de las Tablas 4 y 5 (~8 min)
+python scripts/08_dispersion_test.py    # Cameron-Trivedi (7,73): rapido
 python scripts/07_stars_diagnosis.py    # DIAGNOSTICO con data_base (2 miercoles): NO es una replica, no usar sus resultados
 ```
 
@@ -200,7 +201,8 @@ ruff format .     # formato
 | Mediana de conteos reconstruida desde los archivos diarios (idéntica al paper) | ✅ |
 | Wasserstein y ranking de movilidad (Tabla 2): método del paper implementado, valores no reproducidos | 🟡 |
 | Errores con cluster por comuna y estrellas (SE validados contra R; las estrellas publicadas no se reproducen todas) | 🟡 |
-| Cameron–Trivedi, Moran's I, π | ⏳ |
+| Test de Cameron–Trivedi (7,73): 7,750, dentro de la tolerancia | ✅ |
+| Moran's I, π | ⏳ |
 | Sensibilidad en hora local (`America/Santiago`) | ⏳ |
 | Figuras (1, 2, 6–10) | ⏳ |
 | Extensión a métricas de ruido | ⏳ |

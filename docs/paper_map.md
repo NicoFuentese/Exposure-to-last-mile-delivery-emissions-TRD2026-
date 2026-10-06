@@ -33,7 +33,8 @@
 |---|---|---|---|
 | §4.2.3 | Errores estándar agrupados por comuna (51) | `inference/cluster.py`, `inference/zinb_sandwich.py` | ✅ SE validados contra R (≤ 1,5 %; H25); `scripts/06_inference.py` |
 | §4.2.3 | I de Moran (0,4694 / 0,4756) | `inference/moran.py` | ⏳ |
-| §4.2.1 | Cameron–Trivedi (7,73), π | `inference/dispersion.py` | ⏳ |
+| §4.2.1 | Cameron–Trivedi (7,73) | `inference/dispersion.py` | ✅ 7,750 (0,26 %, H27); `scripts/08_dispersion_test.py` |
+| §4.2.1 | π (probabilidad de cero estructural) | `inference/dispersion.py` | ⏳ (Fase 4D) |
 | Tablas 4–5 | Estrellas de significancia | `reporting/significance.py` | 🟡 calculadas con 3 variantes sobre `00_data` (`paper_text` 50/88, `authors_script` 61/88, `iid`); **no todas coinciden** (H25, H26, D3). Diagnóstico aislado con `data_base` (**no es réplica**): `validation/stars_diagnosis.py`, `scripts/07_stars_diagnosis.py` |
 
 ## Resultados y figuras

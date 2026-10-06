@@ -101,6 +101,11 @@ def compare_columns(
     return pd.DataFrame(rows, columns=columns)
 
 
+# Test de Cameron-Trivedi (7,73): el valor depende de la versión exacta de los datos de los autores
+# (la dispersión cambia ~0,03 con 41 en vez de 42 miércoles), así que se usa el mismo criterio
+# relativo del ZINB (AGENTS.md D2): error relativo de 1 %.
+DISPERSION_TOLERANCE = Tolerance(absolute=0.0, relative=0.01)
+
 STAR_COLUMNS = ("zinb", "ols_k", "ols_kpos", "ols_logk")
 _REFERENCE_ROWS = ("edad_mayor_65", "gse_ab")  # categorías omitidas: sin estrellas por definición
 
@@ -136,6 +141,16 @@ def stars_summary(report: pd.DataFrame) -> pd.DataFrame:
     """Resumen de `compare_stars`: celdas con estrellas iguales y total, por columna."""
     grouped = report.groupby("column")["ok"].agg(matches="sum", cells="count")
     return grouped.reindex(list(STAR_COLUMNS)).astype(int)
+
+
+def load_paper_scalars() -> pd.Series:
+    """Cifras sueltas del texto del paper (`paper_scalars.csv`), indexadas por `name`.
+
+    Hoy: `cameron_trivedi_dispersion` (7,73), `moran_i_distance` (0,4694) y
+    `moran_i_vehicles` (0,4756).
+    """
+    df = pd.read_csv(config.REFERENCE_DIR / "paper_scalars.csv")
+    return df.set_index("name")["value"].astype(float)
 
 
 def load_pscl_oracle(tag: str) -> pd.Series:
