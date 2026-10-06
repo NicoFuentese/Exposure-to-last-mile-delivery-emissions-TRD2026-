@@ -174,6 +174,7 @@ python scripts/04_median_counts.py      # mediana de conteos desde los 42 archiv
 python scripts/05_mobility.py --use-reference   # Wasserstein/movilidad (Tabla 2); sin la bandera tarda ~10 min
 python scripts/06_inference.py          # SE por comuna y estrellas de las Tablas 4 y 5 (~8 min)
 python scripts/08_dispersion_test.py    # Cameron-Trivedi (7,73): rapido
+python scripts/09_moran.py              # I de Moran (0,4694 / 0,4756): rapido; la especificacion no esta identificada
 python scripts/07_stars_diagnosis.py    # DIAGNOSTICO con data_base (2 miercoles): NO es una replica, no usar sus resultados
 ```
 
@@ -202,7 +203,8 @@ ruff format .     # formato
 | Wasserstein y ranking de movilidad (Tabla 2): método del paper implementado, valores no reproducidos | 🟡 |
 | Errores con cluster por comuna y estrellas (SE validados contra R; las estrellas publicadas no se reproducen todas) | 🟡 |
 | Test de Cameron–Trivedi (7,73): 7,750, dentro de la tolerancia | ✅ |
-| Moran's I, π | ⏳ |
+| I de Moran: la lectura literal no reproduce; las alternativas solo se acercan (~1–2 %), especificación no identificada | 🟡 |
+| π | ⏳ |
 | Sensibilidad en hora local (`America/Santiago`) | ⏳ |
 | Figuras (1, 2, 6–10) | ⏳ |
 | Extensión a métricas de ruido | ⏳ |

@@ -30,3 +30,15 @@ def test_every_module_documents_its_paper_origin():
         if absent:
             missing[name] = absent
     assert not missing, f"Módulos sin la documentación requerida: {missing}"
+
+
+def test_test_file_names_are_unique():
+    """Sin `__init__.py` en `tests/`, pytest no puede importar dos archivos con el mismo nombre
+    (falla toda la recolección): cada `test_*.py` debe tener un nombre único en `tests/`."""
+    from collections import Counter
+    from pathlib import Path
+
+    tests_dir = Path(__file__).resolve().parent
+    names = Counter(p.name for p in tests_dir.rglob("test_*.py"))
+    duplicated = sorted(name for name, count in names.items() if count > 1)
+    assert not duplicated, f"Nombres de prueba repetidos: {duplicated}"

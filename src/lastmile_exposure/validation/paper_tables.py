@@ -106,6 +106,25 @@ def compare_columns(
 # relativo del ZINB (AGENTS.md D2): error relativo de 1 %.
 DISPERSION_TOLERANCE = Tolerance(absolute=0.0, relative=0.01)
 
+# I de Moran: la especificación del paper no está identificada (matriz de pesos y agregación en el
+# tiempo sin definir). Etiquetas acordadas: "exacto" = coincide en el cuarto decimal que imprime el
+# paper (|dif| <= 0,0005); "aproximado" = dentro del 2 % relativo, lo que NO identifica la
+# especificación (con dos elecciones libres es fácil acercarse por casualidad); el resto,
+# "no reproduce".
+MORAN_EXACT = Tolerance(absolute=0.0005)
+MORAN_APPROX = Tolerance(relative=0.02)
+
+
+def moran_agreement(value: float, paper: float) -> str:
+    """Etiqueta de una I de Moran frente al paper: `exacto`, `aproximado` o `no reproduce`."""
+    diff = abs(value - paper)
+    if diff <= MORAN_EXACT.limit(paper):
+        return "exacto"
+    if diff <= MORAN_APPROX.limit(paper):
+        return "aproximado"
+    return "no reproduce"
+
+
 STAR_COLUMNS = ("zinb", "ols_k", "ols_kpos", "ols_logk")
 _REFERENCE_ROWS = ("edad_mayor_65", "gse_ab")  # categorías omitidas: sin estrellas por definición
 

@@ -14,6 +14,7 @@ Convención: `NN_descripcion.py`; si el resultado depende de la variante, se ace
 | `06_inference.py` | SE por comuna y estrellas de las Tablas 4 y 5 sobre `00_data` en tres variantes (`paper_text`, `authors_script`, `iid`), comparadas con el paper (~8 min). **Termina siempre con código 0**: las estrellas publicadas no se reproducen todas (H25, H26, D3) |
 | `07_stars_diagnosis.py` | **DIAGNÓSTICO, NO ES UNA RÉPLICA.** Calcula las estrellas con `00_out/data_base` (mediana de los 2 primeros miércoles, no la base del paper) solo para probar por qué las estrellas publicadas no coinciden (H26). Sus resultados no sirven como inferencia ni se usan en tablas o figuras; salida en `outputs/diagnostics/`. Termina siempre con código 0 |
 | `08_dispersion_test.py` | Test de Cameron–Trivedi (dispersión 7,73) sobre el Poisson dinámico y estático; compara con el paper (error relativo ≤ 1 %). Rápido (segundos); código 1 si el dinámico no cumple |
+| `09_moran.py` | I de Moran de la distancia y los vehículos (anillo 1 de H3, pesos `W`/`B`, 3 agregaciones del tiempo) frente a 0,4694 / 0,4756 (segundos). Rotula cada lectura exacto / aproximado / no reproduce y **termina siempre con código 0**: la especificación del paper no está identificada (H28, D8) |
 | `r_oracle/cluster_se.R` | Contraste en R (`sandwich::vcovCL`) de los SE con cluster; ver `reference/r_oracle/README.md` |
 | `r_oracle/zinb_pscl.R` | Contraste en R (`pscl`) del ZINB; ver `reference/r_oracle/README.md` |
 
