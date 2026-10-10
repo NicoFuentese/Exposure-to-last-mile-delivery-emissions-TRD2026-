@@ -28,8 +28,10 @@ El paper cruza, en una grilla **hexágono H3 (res. 9) × hora**, la actividad de
 ├── .venv/               # Entorno virtual (uv). No se versiona
 └── data/                # Datos y paper. NO se versiona (confidencial)
     ├── Basso2026TRD.pdf
-    ├── TRD_replication_share.zip        # Paquete de los autores (código R + bases)
-    └── replication_package/             # El zip extraído
+    ├── TRD_replication_share.zip        # Paquete de los autores, versión anterior (2026-09-29)
+    ├── TRD_replication_share (1).zip    # Paquete vigente de los autores (2026-10-10)
+    ├── replication_package/             # Versión anterior, extraída. Solo la lee el diagnóstico de data_base
+    └── replication_package_v2/          # Paquete vigente, extraído: el que lee el pipeline
 ```
 
 **¿Buscas una fórmula o un paso?** Empieza por [`docs/paper_map.md`](docs/paper_map.md): mapea cada ecuación, tabla y figura del paper a su módulo.
@@ -154,17 +156,17 @@ Las versiones exactas están en [`requirements.txt`](requirements.txt).
 
 Los datos del paper son **confidenciales** (*"The data that has been used is confidential"*) y **no se versionan**: `data/` está en `.gitignore`. No los subas a servicios externos ni los incluyas en commits.
 
-Para extraer el paquete de los autores (una vez copiado el `.zip` en `data/`):
+Para extraer el paquete vigente de los autores (una vez copiado el `.zip` en `data/`), en una carpeta nueva y vacía:
 
 ```bash
-python -m zipfile -e data/TRD_replication_share.zip data/replication_package
+python -m zipfile -e "data/TRD_replication_share (1).zip" data/replication_package_v2
 ```
 
-El paquete incluye las bases finales de modelación y el código R original, pero **no** el GPS crudo ni los archivos diarios de distancia. Qué contiene cada archivo, sus estadísticas y sus limitaciones están en la sección 8 de [`AGENTS.md`](AGENTS.md).
+El paquete incluye las bases finales de modelación, los conteos y las distancias diarias (41 miércoles), las tablas 4 y 5 regeneradas por los autores y el código R original, pero **no** el GPS crudo. La versión anterior (`replication_package/`) solo se conserva por su `00_out/data_base` de 2 miércoles, que lee el diagnóstico de las estrellas; los autores lo reconocieron como un residuo de prueba. Qué contiene cada archivo, sus estadísticas y sus limitaciones están en la sección 8 de [`AGENTS.md`](AGENTS.md).
 
 ## Reproducir resultados
 
-Con el entorno activo y los datos en `data/replication_package/`:
+Con el entorno activo y los datos en `data/replication_package_v2/`:
 
 ```bash
 python scripts/01_table2.py            # Tabla 2 (población flotante)
@@ -175,6 +177,7 @@ python scripts/05_mobility.py --use-reference   # Wasserstein/movilidad (Tabla 2
 python scripts/06_inference.py          # SE por comuna y estrellas de las Tablas 4 y 5 (~8 min)
 python scripts/08_dispersion_test.py    # Cameron-Trivedi (7,73): rapido
 python scripts/09_moran.py              # I de Moran (0,4694 / 0,4756): rapido; la especificacion no esta identificada
+python scripts/10_zero_inflation.py     # pi del ZINB (diagnostico; el paper no lo reporta): ~4 min
 python scripts/07_stars_diagnosis.py    # DIAGNOSTICO con data_base (2 miercoles): NO es una replica, no usar sus resultados
 ```
 
@@ -198,18 +201,18 @@ ruff format .     # formato
 | Análisis del paquete de los autores y de los datos | ✅ |
 | Entorno de trabajo (`uv`, `requirements.txt`) | ✅ |
 | Tabla 2 y columnas de distancia (OLS) de las Tablas 4 y 5, tal cual el paquete | ✅ |
-| Columna ZINB de las Tablas 4 y 5 (dentro de la tolerancia del optimizador) | ✅ |
+| Columna ZINB de las Tablas 4 y 5 (a la precisión impresa, 6·10⁻⁵: el máximo está en π = 0, es la NB) | ✅ |
 | Mediana de conteos reconstruida desde los archivos diarios (idéntica al paper) | ✅ |
 | Wasserstein y ranking de movilidad (Tabla 2): método del paper implementado, valores no reproducidos | 🟡 |
 | Errores con cluster por comuna y estrellas (SE validados contra R; las estrellas publicadas no se reproducen todas) | 🟡 |
 | Test de Cameron–Trivedi (7,73): 7,750, dentro de la tolerancia | ✅ |
 | I de Moran: la lectura literal no reproduce; las alternativas solo se acercan (~1–2 %), especificación no identificada | 🟡 |
-| π | ⏳ |
+| π (el paper no lo reporta): máximo del perfil en π = 0, IC 95 % [0, ~10⁻⁴]; diagnóstico | ℹ️ |
 | Sensibilidad en hora local (`America/Santiago`) | ⏳ |
 | Figuras (1, 2, 6–10) | ⏳ |
 | Extensión a métricas de ruido | ⏳ |
 
-Ya están reproducidos, con código en el paquete y scripts ejecutables, la **Tabla 2** y las tres columnas de distancia (OLS) de las **Tablas 4 y 5** (al redondeo del paper), y la columna **ZINB** (dentro de la tolerancia del optimizador: ni R/`pscl` la reproduce al 4.º decimal). Los detalles, incluidas las diferencias entre el paper y el código de los autores (por ejemplo, que la hora de los conteos de vehículos está en UTC), están en `AGENTS.md`.
+Ya están reproducidos, con código en el paquete y scripts ejecutables, la **Tabla 2** y las tres columnas de distancia (OLS) de las **Tablas 4 y 5** (al redondeo del paper), y la columna **ZINB** (a la precisión impresa: con estos datos el máximo de la verosimilitud está en π = 0, es decir la NB; el ZINB de `pscl` se detiene antes del máximo). Los detalles, incluidas las diferencias entre el paper y el código de los autores (por ejemplo, que la hora de los conteos de vehículos está en UTC), están en `AGENTS.md`.
 
 ## Licencia
 

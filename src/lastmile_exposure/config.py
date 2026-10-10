@@ -15,7 +15,11 @@ from pathlib import Path
 # --- Rutas ---------------------------------------------------------------------------
 ROOT = Path(__file__).resolve().parents[2]
 DATA_DIR = ROOT / "data"  # ignorado por git (datos confidenciales)
-PACKAGE_DIR = DATA_DIR / "replication_package"  # zip de los autores, extraído
+PACKAGE_DIR = DATA_DIR / "replication_package_v2"  # paquete vigente (recibido 2026-10-10)
+# Paquete anterior (2026-09-29), conservado SOLO porque su `00_out/data_base` es el residuo de
+# prueba de 2 miércoles que usa el diagnóstico de las estrellas (H26); en el vigente ya es copia
+# de `00_data`. Nada del pipeline lee de aquí.
+LEGACY_PACKAGE_DIR = DATA_DIR / "replication_package"
 PROCESSED_DIR = DATA_DIR / "processed"  # datos derivados (ignorado por git)
 OUTPUTS_DIR = ROOT / "outputs"  # resultados; ignorado por git por defecto
 REFERENCE_DIR = ROOT / "reference" / "paper_tables"  # cifras publicadas (sí se versionan)

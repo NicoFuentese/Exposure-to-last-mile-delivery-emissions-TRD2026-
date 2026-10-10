@@ -8,6 +8,9 @@ resultados de la réplica:
 - `00_out/data_base` NO es la base del paper: sus conteos son la mediana de solo los DOS primeros
   miércoles (2024-01-03 y 2024-01-10), no de los 41–42 del paper, y sus coeficientes no son los
   publicados. Con 2 días de datos los errores estándar y las estrellas no valen como inferencia.
+  Los autores lo confirmaron (2026-10-09): era un residuo de una prueba del paquete ("bajo
+  ninguna circunstancia deberías usar la data que solo tiene 2 miércoles") y ya lo reemplazaron
+  por una copia de `00_data`. Esa versión de 2 miércoles solo queda en `config.LEGACY_PACKAGE_DIR`.
 - Aquí solo se usa para comprobar la hipótesis de que las estrellas del paper se generaron con
   esa base (los scripts de los autores la leen por defecto): con ella coinciden 78 de 88 estrellas
   frente a 61 de 88 con `00_data`. Es evidencia sugerente, no una prueba (quedan 10 celdas
@@ -39,7 +42,9 @@ from lastmile_exposure.validation.paper_tables import (
 
 DIAGNOSTIC_ONLY = True
 SOURCE_LABEL = "DIAGNOSTICO_data_base_2_miercoles"
-DATA_BASE_DIR = config.PACKAGE_DIR / "00_out" / "data_base"
+# El `data_base` del paquete vigente ya es copia de `00_data`; el de 2 miércoles solo existe en el
+# paquete anterior (los autores confirmaron que era un residuo de prueba, no usar para nada más).
+DATA_BASE_DIR = config.LEGACY_PACKAGE_DIR / "00_out" / "data_base"
 OUTPUT_DIRNAME = "diagnostics"
 FILE_PREFIX = "DIAGNOSTICO_data_base_"
 COUNTS_FILE = "hexagon_model_median_wednesdays_RM.csv"

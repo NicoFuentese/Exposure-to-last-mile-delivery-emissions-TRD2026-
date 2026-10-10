@@ -127,18 +127,31 @@ def test_compare_columns_flags_missing_and_nan_cells():
 
 
 def test_relative_tolerance_scales_with_the_paper_value_and_has_a_floor():
-    """El criterio acordado para el ZINB: máx(0,005; 1 % × |valor del paper|)."""
-    from lastmile_exposure.validation.paper_tables import ZINB_TOLERANCE, Tolerance, compare_columns
+    """El mecanismo `Tolerance` (p. ej. Cameron–Trivedi): máx(piso; relativa × |valor|)."""
+    from lastmile_exposure.validation.paper_tables import Tolerance, compare_columns
 
-    assert ZINB_TOLERANCE == Tolerance(absolute=0.005, relative=0.01)
-    assert ZINB_TOLERANCE.limit(14.2813) == pytest.approx(0.142813)  # relativo manda
-    assert ZINB_TOLERANCE.limit(0.313) == pytest.approx(0.005)  # manda el piso
+    tolerance = Tolerance(absolute=0.005, relative=0.01)
+    assert tolerance.limit(14.2813) == pytest.approx(0.142813)  # relativo manda
+    assert tolerance.limit(0.313) == pytest.approx(0.005)  # manda el piso
 
     reference = pd.DataFrame({"variable": ["big", "small"], "x": [14.2813, 0.4997]})
     # 0,03 de error: dentro del 1 % del valor grande, fuera del piso del valor pequeño
     computed = pd.DataFrame({"variable": ["big", "small"], "x": [14.2813 - 0.03, 0.4997 + 0.03]})
-    report = compare_columns(computed, reference, {"x": ZINB_TOLERANCE})
+    report = compare_columns(computed, reference, {"x": tolerance})
     assert report["ok"].tolist() == [True, False]
     assert report["limit"].tolist() == pytest.approx([0.142813, 0.005])
     # un número simple sigue siendo una tolerancia absoluta
     assert compare_columns(computed, reference, {"x": 0.05})["ok"].tolist() == [True, True]
+
+
+def test_zinb_tolerance_is_the_printed_precision():
+    """D2 (2026-10-10): la columna ZINB se compara a la precisión impresa (6e-5), como las OLS;
+    el criterio relativo de 1 % valía para el ZINB de `statsmodels`, que no alcanza la frontera."""
+    from lastmile_exposure.validation.paper_tables import (
+        MARGINAL_TOLERANCE,
+        ZINB_TOLERANCE,
+        Tolerance,
+    )
+
+    assert ZINB_TOLERANCE == Tolerance(absolute=MARGINAL_TOLERANCE)
+    assert ZINB_TOLERANCE.limit(14.2813) == pytest.approx(6e-5)  # sin componente relativa

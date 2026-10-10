@@ -67,7 +67,7 @@ def inference_table(
     """SE, p-valores y estrellas de las cuatro columnas de la Tabla 4 (o 5).
 
     `distance_df` y `count_df` son `panel.distance_frame()` y `panel.count_frame()` (con la misma
-    demografía, dinámica o estática); `zinb` es `fit_zinb(count_df)`. `cluster` es la columna de
+    demografía, dinámica o estática); `zinb` es `fit_zinb_mle(count_df)`. `cluster` es la columna de
     agrupación (`"comuna"`), `None` para los errores sin cluster (variante `summary_results.R`) u
     `inference.cluster.OBSERVATION` (cada fila es su cluster: el `NULL` de R, sin agrupar).
     `zinb_cluster` fija el cluster de la columna ZINB por separado (por defecto, el mismo

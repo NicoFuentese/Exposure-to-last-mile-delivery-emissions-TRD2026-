@@ -10,7 +10,12 @@ import pytest
 
 from lastmile_exposure import config
 from lastmile_exposure.models.marginal_effects import zinb_marginal_effects
-from lastmile_exposure.models.zinb import ALPHA, CONST, INFLATE
+from lastmile_exposure.models.zinb import (
+    ALPHA,
+    CONST,
+    INFLATE,
+    inflation_score_at_zero,
+)
 from lastmile_exposure.reporting.marginal_tables import zinb_marginal_column
 from lastmile_exposure.validation.paper_tables import (
     ZINB_TOLERANCE,
@@ -24,7 +29,7 @@ pytestmark = pytest.mark.slow
 
 CASES = [("zinb_dynamic", "dynamic", load_table4), ("zinb_static", "static", load_table5)]
 IDS = ["tabla4_dinamico", "tabla5_estatico"]
-PSCL_SPREAD = 0.05  # dispersión entre dos optimizadores sobre la misma verosimilitud plana
+PSCL_SPREAD = 0.05  # dispersión entre dos optimizadores sobre la misma verosimilitud (H22, H23)
 
 
 def _table(result, formula="authors"):
@@ -37,13 +42,26 @@ def _table(result, formula="authors"):
 
 
 @pytest.mark.parametrize(("fixture", "tag", "loader"), CASES, ids=IDS)
-def test_zinb_column_matches_paper_within_optimizer_tolerance(request, fixture, tag, loader):
+def test_zinb_column_matches_paper_at_printed_precision(request, fixture, tag, loader):
+    """El máximo del ZINB (la frontera π = 0, es decir la NB) reproduce la columna del paper a la
+    precisión que imprime (6e-5), igual que las columnas OLS. D2 (2026-10-10)."""
     result = request.getfixturevalue(fixture)
+    assert result.boundary
     report = compare_columns(_table(result), loader(), {"zinb": ZINB_TOLERANCE})
     assert len(report) == 13
     assert report["ok"].all(), f"Celdas fuera de tolerancia:\n{report[~report['ok']]}"
     nonzero = report[report["paper"] != 0]
     assert (np.sign(nonzero["computed"]) == np.sign(nonzero["paper"])).all()  # mismos signos
+
+
+@pytest.mark.parametrize(("fixture", "tag", "loader"), CASES, ids=IDS)
+def test_boundary_is_the_maximum_first_order_condition(request, fixture, tag, loader):
+    """H29: ∂ℓ/∂π en π = 0 es muy negativa (−24.820 y −43.922): subir π empeora la verosimilitud."""
+    result = request.getfixturevalue(fixture)
+    y = np.round(result.model.endog)
+    score = inflation_score_at_zero(y, result.mu(), float(result.params[ALPHA]))
+    assert score < -10_000
+    assert result.max_abs_score < 1e-8  # y los demás parámetros están en su máximo
 
 
 @pytest.mark.parametrize(("fixture", "tag", "loader"), CASES, ids=IDS)

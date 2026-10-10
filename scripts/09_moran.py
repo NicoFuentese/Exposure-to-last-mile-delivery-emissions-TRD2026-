@@ -3,7 +3,7 @@
 Uso (con el entorno activo, desde la raiz del repositorio):
     python scripts/09_moran.py               # rapido: unos segundos
 
-Entrada: data/replication_package/00_data/ (datos confidenciales, no versionados)
+Entrada: data/replication_package_v2/00_data/ (datos confidenciales, no versionados)
 Salida:  outputs/as_published/tables/moran.csv
 Codigo:  src/lastmile_exposure/inference/moran.py (docs/paper_map.md)
 

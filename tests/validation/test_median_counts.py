@@ -73,11 +73,25 @@ def test_excluding_the_holiday_gives_41_wednesdays(panel, rebuilt):
     assert not np.array_equal(out["median_vehicles"], rebuilt["median_vehicles"])
 
 
-def test_data_base_counts_are_the_median_of_the_first_two_wednesdays(daily_counts, panel):
-    """H26: `00_out/data_base` (la copia que leen por defecto los scripts de los autores) NO es la
-    base del paper: su `median_vehicles` es exactamente la mediana de los dos primeros miércoles
-    (2024-01-03 y 2024-01-10) de los conteos diarios."""
-    path = config.PACKAGE_DIR / "00_out" / "data_base" / "hexagon_model_median_wednesdays_RM.csv"
+def test_current_data_base_is_an_exact_copy_of_00_data(panel):
+    """El paquete vigente ya trae `data_base` como copia exacta de `00_data` (42 miércoles): los
+    autores reemplazaron el residuo de prueba de 2 miércoles (README de `00_data`, 2026-10-09)."""
+    for name in (
+        "hexagon_model_median_wednesdays_RM.csv",
+        "hexagon_model_median_wednesday_alternative_metrics_RM.csv",
+    ):
+        current = (config.PACKAGE_DIR / "00_out" / "data_base" / name).read_bytes()
+        assert current == (config.PACKAGE_DIR / "00_data" / name).read_bytes()
+
+
+def test_data_base_counts_are_the_median_of_the_first_two_wednesdays(
+    daily_counts, panel, legacy_data_base
+):
+    """H26: el `00_out/data_base` del paquete ANTERIOR (la copia que leían por defecto los scripts
+    de los autores) NO es la base del paper: su `median_vehicles` es exactamente la mediana de los
+    dos primeros miércoles (2024-01-03 y 2024-01-10) de los conteos diarios. Los autores
+    confirmaron que era un residuo de prueba."""
+    path = legacy_data_base / "hexagon_model_median_wednesdays_RM.csv"
     data_base = pd.read_csv(path, usecols=["hex", "hour", "median_vehicles", "count_wednesdays"])
     first_two = sorted(daily_counts["date"].unique())[:2]
     assert [str(d.date()) for d in first_two] == ["2024-01-03", "2024-01-10"]

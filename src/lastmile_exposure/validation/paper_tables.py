@@ -5,10 +5,16 @@ Código de los autores: (no aplica)
 Hallazgos (AGENTS.md §7): §7.2 (estado de la validación)
 Estado: implementado. Compara valores (Fase 3) y estrellas (`compare_stars`, Fase 4A).
 
-Las cifras viven en `reference/paper_tables/*.csv` (ver su README).
+Las cifras viven en `reference/paper_tables/*.csv` (ver su README). Además, `load_authors_reference`
+lee las Tablas 4 y 5 REGENERADAS por los autores con los datos de 42 miércoles (paquete,
+`00_out/reference_tables_42wed/`): los coeficientes son los publicados, pero las estrellas del paper
+NO corresponden a esas tablas (los autores lo reconocen), así que ellas, no el paper, son el
+objetivo de validación de las estrellas. Son datos del paquete, no se versionan.
 """
 
+import re
 from dataclasses import dataclass
+from pathlib import Path
 
 import pandas as pd
 
@@ -28,12 +34,13 @@ class Tolerance:
 
 # Tolerancia absoluta según la precisión con que el paper imprime cada cifra.
 TABLE2_TOLERANCES = {"mean": 0.006, "std": 0.006, "mean_pct": 0.051, "std_pct": 0.051}
-MARGINAL_TOLERANCE = 6e-5  # el paper imprime 4 decimales (columnas OLS)
-# ZINB: la columna del paper depende de dónde detuvo su búsqueda el optimizador (la verosimilitud es
-# casi plana, π → 0); ni R/pscl la reproduce al 4.º decimal (dif. máx. 0,0038). Criterio ACORDADO
-# con el usuario (2026-10-03, AGENTS.md D2): error relativo de 1 % con un piso de 0,005 para los
-# coeficientes cercanos a cero. Detecta fórmulas equivocadas (desvíos > 1).
-ZINB_TOLERANCE = Tolerance(absolute=0.005, relative=0.01)
+MARGINAL_TOLERANCE = 6e-5  # el paper imprime 4 decimales (columnas OLS y ZINB)
+# ZINB: la columna del paper es numéricamente la NB (π = 0), el máximo de la verosimilitud (H29):
+# coincide con `fit_zinb_mle` a la precisión que imprime (dif. máx. 5,7e-5 y 4,5e-5), igual que
+# las columnas OLS. Criterio ACORDADO con el usuario (2026-10-10, AGENTS.md D2), que endurece el
+# relativo de 1 % con piso 0,005 del 2026-10-03: ese valía para el ZINB de `statsmodels` (que no
+# alcanza la frontera, dif. hasta 0,0321) y para `pscl` (dif. hasta 0,0038), no para el máximo.
+ZINB_TOLERANCE = Tolerance(absolute=MARGINAL_TOLERANCE)
 
 
 def load_reference(name: str, *, text_stars: bool = False) -> pd.DataFrame:
@@ -55,6 +62,54 @@ def load_table4() -> pd.DataFrame:
 
 def load_table5() -> pd.DataFrame:
     return load_reference("table5_static", text_stars=True)
+
+
+# Tablas regeneradas por los autores (summary_results_cluster.R y summary_results_static_cluster.R)
+AUTHORS_REFERENCE_FOLDERS = {
+    "dynamic": ("table4_dynamic_clustered", "Log OLS"),
+    "static": ("table5_static_clustered", "Log-Linear"),
+}
+AUTHORS_REFERENCE_COLUMNS = {
+    "nb": "NB",
+    "zinb": "ZINB",
+    "ols_k": "OLS",
+    "ols_kpos": "OLS (no zero)",
+}
+_CELL = re.compile(r"^(-?\d+(?:\.\d+)?)(\*{1,3}|\.)?$")
+
+
+def authors_reference_dir() -> Path:
+    """Carpeta `00_out/reference_tables_42wed` del paquete vigente."""
+    return config.PACKAGE_DIR / "00_out" / "reference_tables_42wed"
+
+
+def load_authors_reference(tag: str) -> pd.DataFrame:
+    """Tabla 4 (`tag="dynamic"`) o 5 (`"static"`) regenerada por los autores, con la forma de
+    `load_table4()`: `variable` y, por columna, el valor y sus estrellas (`<col>`, `<col>_sig`).
+
+    Columnas: `nb` (glm.nb), `zinb` (pscl), `ols_k`, `ols_kpos` y `ols_logk`. Notas:
+    - La columna `nb` es la que coincide con la "ZINB" del paper (H23): la ZINB de `pscl` se
+      detiene antes del máximo.
+    - `ols_logk` dinámica viene multiplicada por la media de `K̃>0` (490,52; H9): solo sirve para
+      las estrellas. La estática es el coeficiente crudo.
+    - En la tabla estática el cluster del `zinb` queda NULL (H26) y no se agrupa por comuna; las
+      estrellas del `nb` (las 11 son `***`) indican lo mismo.
+    """
+    folder, log_name = AUTHORS_REFERENCE_FOLDERS[tag]
+    path = authors_reference_dir() / folder / "selected_models_marginal_effects.csv"
+    raw = pd.read_csv(path, dtype=str, keep_default_na=False)
+    variable_of = {label: variable for variable, label, _ in config.TABLE_ROWS}
+    unknown = set(raw["Variable"]) - set(variable_of)
+    if unknown:
+        raise ValueError(f"{path.name}: filas que no son de la Tabla 4/5: {sorted(unknown)}")
+    out = pd.DataFrame({"variable": raw["Variable"].map(variable_of)})
+    for key, column in {**AUTHORS_REFERENCE_COLUMNS, "ols_logk": log_name}.items():
+        cells = raw[column].map(_CELL.match)
+        if cells.isna().any():
+            raise ValueError(f"{path.name}: celdas ilegibles en {column!r}")
+        out[key] = cells.map(lambda m: float(m.group(1)))
+        out[f"{key}_sig"] = cells.map(lambda m: m.group(2) or "")
+    return out
 
 
 def compare_columns(

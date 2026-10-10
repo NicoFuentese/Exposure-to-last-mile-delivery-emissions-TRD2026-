@@ -3,7 +3,7 @@
 Uso (con el entorno activo, desde la raíz del repositorio):
     python scripts/02_distance_tables.py
 
-Entradas (datos confidenciales, no versionados), en data/replication_package/00_data/:
+Entradas (datos confidenciales, no versionados), en data/replication_package_v2/00_data/:
     hexagon_model_median_wednesday_alternative_metrics_RM.csv, datosxhexagono.csv
 Salidas:  outputs/as_published/tables/table4_distance_columns.csv y table5_distance_columns.csv
 Código:   src/lastmile_exposure/reporting/marginal_tables.py  (ver docs/paper_map.md)

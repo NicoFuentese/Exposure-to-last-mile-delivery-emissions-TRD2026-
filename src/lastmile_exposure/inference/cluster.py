@@ -183,7 +183,8 @@ def nb_inference(
 
     NO es lo que calcularon los autores: el sandwich del ZINB completo difiere de este (SE de −17 %
     a +6 %, H25; ver `inference/zinb_sandwich.py`, que sí lo replica). Esta versión evita la
-    dirección de la inflación, que no está identificada con estos datos, y sirve de contraste.
+    dirección de la inflación (su coeficiente logit tiende a −∞ con estos datos: no está
+    identificado, aunque π sí, y vale ≈ 0; H21, H29) y sirve de contraste.
     `fit` es el `ZinbResult` (se usan sus coeficientes de conteo y α) o una serie de parámetros
     con el índice de `ZinbResult.params`; `df` es el marco de modelación de conteos.
     """

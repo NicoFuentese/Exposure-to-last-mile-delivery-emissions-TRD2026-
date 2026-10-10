@@ -5,8 +5,9 @@ Código de los autores: 04_modeling_wedenesday.R (lectura de `miercoles_rm.csv`)
 Hallazgos (AGENTS.md §7): H6, H13, H15
 Estado: implementado (Fase 3). Lee y valida la grilla; reproduce la Tabla 2.
 
-Se leen SOLO los archivos de `data/replication_package/00_data/`: las copias de
-`00_out/data_base/` no son las del paper (H6).
+Se leen SOLO los archivos de `data/replication_package_v2/00_data/`. El `00_out/data_base/` del
+paquete anterior NO era la base del paper (residuo de 2 miércoles, H6, H26); en el vigente es una
+copia exacta de `00_data`.
 """
 
 from pathlib import Path

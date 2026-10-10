@@ -9,7 +9,9 @@ ADVERTENCIA: este script NO reproduce el paper y sus resultados NO sirven como i
 generaron con esa base (los scripts de los autores la leen por defecto): con ella coinciden
 78 de 88 estrellas frente a 61 de 88 con `00_data`. No usar sus salidas en tablas ni figuras.
 
-Entrada: data/replication_package/00_out/data_base/ (datos confidenciales, no versionados)
+Entrada: data/replication_package/00_out/data_base/ (paquete ANTERIOR, `config.LEGACY_PACKAGE_DIR`;
+         en el vigente, replication_package_v2, data_base ya es copia de 00_data y no sirve aquí.
+         Datos confidenciales, no versionados)
 Salida:  outputs/diagnostics/DIAGNOSTICO_data_base_*.csv (nunca en outputs/as_published/)
 Código:  src/lastmile_exposure/validation/stars_diagnosis.py
 Termina siempre con código 0.

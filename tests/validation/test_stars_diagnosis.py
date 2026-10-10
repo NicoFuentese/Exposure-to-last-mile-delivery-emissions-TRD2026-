@@ -30,7 +30,7 @@ RESIDUAL = {  # las 10 celdas que siguen distintas del paper
 
 
 @pytest.fixture(scope="module")
-def diagnosis(panel):
+def diagnosis(panel, legacy_data_base):
     return diag.run_diagnosis(write=False)  # ajusta 2 ZINB sobre data_base (~3 min)
 
 

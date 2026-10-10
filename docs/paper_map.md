@@ -22,7 +22,7 @@
 
 | Paper | Qué es | Módulo | Estado |
 |---|---|---|---|
-| Ec. (1)–(3) | ZINB, inflación constante, NB2 | `models/zinb.py` | ✅ reproduce la col. ZINB dentro de la tolerancia del optimizador (H21–H23) |
+| Ec. (1)–(3) | ZINB, inflación constante, NB2 | `models/zinb.py` | ✅ `fit_zinb_mle` (máximo en la frontera π = 0, la NB) reproduce la col. ZINB a la precisión impresa (H21–H23, H29) |
 | Ec. (4) | Efecto marginal del ZINB | `models/marginal_effects.py` | ✅ tres fórmulas; `authors` = `eq4` porque π̂ ≈ 0 (H10, H21) |
 | Ec. (5)–(6) | OLS de `K̃` y `log K̃` | `models/ols.py` | ✅ Tablas 4–5, cols. 2 y 4 (H8) |
 | Tablas 4–5, col. 3 | "OLS `K̃>0`" = logit + OLS | `models/two_part.py` | ✅ (H7) |
@@ -34,7 +34,7 @@
 | §4.2.3 | Errores estándar agrupados por comuna (51) | `inference/cluster.py`, `inference/zinb_sandwich.py` | ✅ SE validados contra R (≤ 1,5 %; H25); `scripts/06_inference.py` |
 | §4.2.3 | I de Moran (0,4694 / 0,4756) | `inference/moran.py` | 🟡 la lectura literal (0,419 / 0,430) **no reproduce**; las alternativas se acercan a ~1–2 % pero la especificación no está identificada (H28); `scripts/09_moran.py` |
 | §4.2.1 | Cameron–Trivedi (7,73) | `inference/dispersion.py` | ✅ 7,750 (0,26 %, H27); `scripts/08_dispersion_test.py` |
-| §4.2.1 | π (probabilidad de cero estructural) | `inference/dispersion.py` | ⏳ (Fase 4D) |
+| §4.2.1 | π (probabilidad de cero estructural) | `inference/zero_inflation.py` | ℹ️ diagnóstico (el paper no reporta π): máximo del perfil en π = 0, IC 95 % [0, ~10⁻⁴] (H29); `scripts/10_zero_inflation.py` |
 | Tablas 4–5 | Estrellas de significancia | `reporting/significance.py` | 🟡 calculadas con 3 variantes sobre `00_data` (`paper_text` 50/88, `authors_script` 61/88, `iid`); **no todas coinciden** (H25, H26, D3). Diagnóstico aislado con `data_base` (**no es réplica**): `validation/stars_diagnosis.py`, `scripts/07_stars_diagnosis.py` |
 
 ## Resultados y figuras
@@ -58,7 +58,7 @@ Las cifras publicadas están en [`reference/paper_tables/`](../reference/paper_t
 | Tabla 2 (62 celdas) | `python scripts/01_table2.py` | ✅ todas dentro del redondeo del paper |
 | Tablas 4 y 5, columnas de distancia (39 + 39 celdas) | `python scripts/02_distance_tables.py` | ✅ diferencia máxima 5·10⁻⁵ (4 decimales) |
 | Mediana de conteos (178.304 filas × 2 columnas) | `python scripts/04_median_counts.py` (~1 min) | ✅ igualdad exacta con la base del paper |
-| Tablas 4 y 5, columna ZINB (13 + 13 celdas) | `python scripts/03_zinb_tables.py` (~2 min) | ✅ dif. máx. 0,0032 (T4) y 0,0321 (T5); mismos signos; criterio relativo 1 % con piso 0,005 (D2, acordado) |
+| Tablas 4 y 5, columna ZINB (13 + 13 celdas) | `python scripts/03_zinb_tables.py` (~2 min) | ✅ dif. máx. 5,7·10⁻⁵ (T4) y 4,4·10⁻⁵ (T5); tolerancia = precisión impresa, 6·10⁻⁵ (D2, acordado 2026-10-10) |
 
 ## Convención de documentación
 

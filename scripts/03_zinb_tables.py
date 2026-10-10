@@ -1,20 +1,22 @@
 """Reproduce la columna ZINB de las Tablas 4 (dinámico) y 5 (estático); completa las 4 columnas.
 
 Uso (con el entorno activo, desde la raíz del repositorio):
-    python scripts/03_zinb_tables.py        # ~2 minutos (dos ajustes ZINB de ~1 minuto)
+    python scripts/03_zinb_tables.py        # ~2 minutos (dos ajustes de la NB, 30-60 s c/u)
 
-Entradas (datos confidenciales, no versionados), en data/replication_package/00_data/:
+Entradas (datos confidenciales, no versionados), en data/replication_package_v2/00_data/:
     hexagon_model_median_wednesdays_RM.csv,
     hexagon_model_median_wednesday_alternative_metrics_RM.csv, datosxhexagono.csv
 Salidas:  outputs/as_published/tables/table4_complete_no_stars.csv y table5_complete_no_stars.csv
 Código:   src/lastmile_exposure/models/zinb.py y reporting/marginal_tables.py (docs/paper_map.md)
 
-El ZINB usa vehicles = round(median_vehicles) con π constante. La columna `zinb` de la salida usa
-la fórmula de efecto marginal del código de los autores ("authors"); el script imprime también la
-distancia máxima al paper de las otras fórmulas (H10 en AGENTS.md). Las estrellas de significancia
-se añaden en la Fase 4. Solo variante `as_published`.
+El ZINB usa vehicles = round(median_vehicles) con π constante y se reporta su MÁXIMO
+(`fit_zinb_mle`): con estos datos está en la frontera π = 0, es decir la NB (H29, H23). La columna
+`zinb` de la salida usa la fórmula de efecto marginal del código de los autores ("authors"); el
+script imprime también la distancia máxima al paper de las otras fórmulas (H10 en AGENTS.md). Las
+estrellas de significancia se añaden en la Fase 4. Solo variante `as_published`.
 
-Sale con código 1 si alguna celda de las cuatro columnas difiere del paper más de su tolerancia.
+Sale con código 1 si alguna celda de las cuatro columnas difiere del paper más de su tolerancia
+(la precisión impresa, 6e-5, en las cuatro columnas).
 """
 
 import sys
@@ -22,7 +24,7 @@ import time
 
 from lastmile_exposure import config
 from lastmile_exposure.models.marginal_effects import ZINB_FORMULAS
-from lastmile_exposure.models.zinb import fit_zinb
+from lastmile_exposure.models.zinb import fit_zinb_mle
 from lastmile_exposure.panel import count_frame, distance_frame
 from lastmile_exposure.reporting.marginal_tables import (
     distance_marginal_table,
@@ -54,11 +56,11 @@ def main() -> int:
     ):
         label = "estatico" if static else "dinamico"
         t0 = time.time()
-        result = fit_zinb(count_frame(static=static))
+        result = fit_zinb_mle(count_frame(static=static))
         print(
             f"{name} ({label}): ZINB en {time.time() - t0:.0f} s, {result.n_iter} iteraciones, "
             f"loglike={result.llf:.3f}, max|score|/n={result.max_abs_score:.1e}, "
-            f"pi={result.pi:.3e}, theta={result.theta:.4f}"
+            f"pi={result.pi:.3e}, theta={result.theta:.4f}, frontera={result.boundary}"
         )
         table = distance_marginal_table(distance_frame(static=static))
         for formula in ZINB_FORMULAS:

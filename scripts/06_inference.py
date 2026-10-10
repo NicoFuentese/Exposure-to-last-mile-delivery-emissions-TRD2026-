@@ -3,7 +3,7 @@
 Uso (con el entorno activo, desde la raíz del repositorio):
     python scripts/06_inference.py          # ajusta el ZINB (~1,5 min por tabla) y todo lo demás
 
-Entrada: data/replication_package/00_data/ (datos confidenciales, no versionados)
+Entrada: data/replication_package_v2/00_data/ (datos confidenciales, no versionados)
 Salida:  outputs/as_published/tables/inference_<tabla>_<variante>.csv (SE, p y estrellas por celda)
          outputs/as_published/tables/stars_<tabla>_<variante>.csv (comparación celda a celda)
 Código:  src/lastmile_exposure/inference/ y reporting/significance.py (docs/paper_map.md)
@@ -24,7 +24,7 @@ import sys
 import pandas as pd
 
 from lastmile_exposure import config
-from lastmile_exposure.models.zinb import fit_zinb
+from lastmile_exposure.models.zinb import fit_zinb_mle
 from lastmile_exposure.panel import count_frame, distance_frame
 from lastmile_exposure.reporting.significance import (
     authors_script_inference_table,
@@ -60,8 +60,12 @@ def main() -> int:
     summary = {}
     for tag, static, load_reference in TABLES:
         counts, distance = count_frame(static=static), distance_frame(static=static)
-        zinb = fit_zinb(counts)
-        print(f"{tag}: ZINB ajustado (pi = {zinb.pi:.2e}, theta = {zinb.theta:.4f})", flush=True)
+        zinb = fit_zinb_mle(counts)
+        print(
+            f"{tag}: ZINB ajustado (pi = {zinb.pi:.2e}, theta = {zinb.theta:.4f}, "
+            f"frontera = {zinb.boundary})",
+            flush=True,
+        )
         reference = load_reference()
         for variant in VARIANTS:
             table = build(variant, distance, counts, zinb, static)

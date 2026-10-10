@@ -3,7 +3,7 @@
 Uso (con el entorno activo, desde la raíz del repositorio):
     python scripts/01_table2.py
 
-Entrada: data/replication_package/00_data/miercoles_rm.csv (datos confidenciales, no versionados)
+Entrada: data/replication_package_v2/00_data/miercoles_rm.csv (datos confidenciales, no versionados)
 Salida:  outputs/as_published/tables/table2.csv
 Código:  src/lastmile_exposure/reporting/table2.py  (ver docs/paper_map.md)
 

@@ -3,7 +3,7 @@
 Uso (con el entorno activo, desde la raíz del repositorio):
     python scripts/04_median_counts.py       # ~1 minuto
 
-Entradas (datos confidenciales, no versionados), en data/replication_package/:
+Entradas (datos confidenciales, no versionados), en data/replication_package_v2/:
     00_out/hexagon_count/hexagon_count_*_cleaned.csv   (42 miércoles; hora y fecha en UTC)
     00_data/miercoles_rm.csv                            (grilla de 11.144 hex x 16 horas)
     00_data/hexagon_model_median_wednesdays_RM.csv      (base del paper, para comparar)

@@ -3,7 +3,7 @@
 Uso (con el entorno activo, desde la raíz del repositorio):
     python scripts/08_dispersion_test.py     # rápido: un Poisson de 178.304 filas por tabla
 
-Entrada: data/replication_package/00_data/ (datos confidenciales, no versionados)
+Entrada: data/replication_package_v2/00_data/ (datos confidenciales, no versionados)
 Salida:  outputs/as_published/tables/cameron_trivedi.csv
 Código:  src/lastmile_exposure/inference/dispersion.py (docs/paper_map.md)
 
