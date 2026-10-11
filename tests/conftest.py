@@ -90,6 +90,15 @@ def zero_inflation_reports(model_frames):
 
 
 @pytest.fixture(scope="session")
+def daily_metrics():
+    """Los 41 archivos diarios de distancia y tiempo (horas 7-22, UTC); se leen una sola vez."""
+    _require_data()
+    from lastmile_exposure.io.daily_metrics import load_daily_metrics
+
+    return load_daily_metrics()
+
+
+@pytest.fixture(scope="session")
 def daily_counts():
     """Los 42 archivos diarios de conteos (horas 7-22, UTC); se leen una sola vez."""
     _require_data()

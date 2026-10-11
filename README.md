@@ -173,7 +173,9 @@ python scripts/01_table2.py            # Tabla 2 (población flotante)
 python scripts/02_distance_tables.py   # columnas de distancia de las Tablas 4 y 5
 python scripts/03_zinb_tables.py        # columna ZINB de las Tablas 4 y 5 (~2 min)
 python scripts/04_median_counts.py      # mediana de conteos desde los 42 archivos diarios (~1 min)
+python scripts/11_median_distance.py    # mediana de distancia y tiempo desde los 41 archivos diarios (~30 s)
 python scripts/05_mobility.py --use-reference   # Wasserstein/movilidad (Tabla 2); sin la bandera tarda ~10 min
+python scripts/12_mobility_seeds.py --use-reference   # Wasserstein con el metodo de los autores y 200 semillas; sin la bandera ~40 min con 8 procesos
 python scripts/06_inference.py          # SE por comuna y estrellas de las Tablas 4 y 5 (~8 min)
 python scripts/08_dispersion_test.py    # Cameron-Trivedi (7,73): rapido
 python scripts/09_moran.py              # I de Moran (0,4694 / 0,4756): rapido; la especificacion no esta identificada
@@ -203,12 +205,13 @@ ruff format .     # formato
 | Tabla 2 y columnas de distancia (OLS) de las Tablas 4 y 5, tal cual el paquete | ✅ |
 | Columna ZINB de las Tablas 4 y 5 (a la precisión impresa, 6·10⁻⁵: el máximo está en π = 0, es la NB) | ✅ |
 | Mediana de conteos reconstruida desde los archivos diarios (idéntica al paper) | ✅ |
-| Wasserstein y ranking de movilidad (Tabla 2): método del paper implementado, valores no reproducidos | 🟡 |
-| Errores con cluster por comuna y estrellas (SE validados contra R; las estrellas publicadas no se reproducen todas) | 🟡 |
+| Mediana de distancia y tiempo reconstruida desde los 41 archivos diarios del paquete v2 (idéntica al paper) | ✅ |
+| Wasserstein y ranking de movilidad (Tabla 2): los autores usaron una muestra aleatoria sin semilla, así que los valores no se reproducen exactamente; con 200 semillas, 13/15 caen en la banda del 95 % y los extremos son estables (`scripts/12_mobility_seeds.py`) | 🟡 |
+| Errores con cluster por comuna y estrellas: 88/88 contra las tablas regeneradas por los autores (las impresas en el paper no salen del método correcto, como reconocen) | ✅ |
 | Test de Cameron–Trivedi (7,73): 7,750, dentro de la tolerancia | ✅ |
 | I de Moran: la lectura literal no reproduce; las alternativas solo se acercan (~1–2 %), especificación no identificada | 🟡 |
 | π (el paper no lo reporta): máximo del perfil en π = 0, IC 95 % [0, ~10⁻⁴]; diagnóstico | ℹ️ |
-| Sensibilidad en hora local (`America/Santiago`) | ⏳ |
+| Sensibilidad en hora local (`America/Santiago`), ahora con conteos y distancia | ⏳ |
 | Figuras (1, 2, 6–10) | ⏳ |
 | Extensión a métricas de ruido | ⏳ |
 

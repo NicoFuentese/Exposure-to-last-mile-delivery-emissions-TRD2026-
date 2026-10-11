@@ -13,7 +13,8 @@
 | §5.2 | Demografía estática (`datosxhexagono.csv`) | `io/static.py`, `demographics/static.py` | ✅ (H8) |
 | §3.2, Tabla 3 | GPS de vehículos | `io/gps.py` | ⏳ (solo 1 día) |
 | §4.1.1, Fig. 4 | Conteo `Y_hi` y mediana `Ỹ_hi` | `exposure/vehicles_counts.py`, `exposure/aggregate.py` | ✅ la mediana desde los 42 archivos diarios es **idéntica** a la del paper (H2); `scripts/04_median_counts.py`. `Y_hi` por día desde el GPS crudo: 🚫 |
-| §4.1.2, Fig. 5 | Distancia `K_hi` y mediana `K̃_hi` | `exposure/vehicles_distance.py` | 🚫 faltan distancias diarias (H4, D7) |
+| §4.1.2 | Distancia y tiempo diarios por hexágono-hora (41 miércoles) | `io/daily_metrics.py` | ✅ (H30) |
+| §4.1.2, Fig. 5 | Distancia `K_hi` y mediana `K̃_hi` | `exposure/vehicles_distance.py` | ✅ las 178.304 medianas (distancia, tiempo y `count_wednesdays`) se reconstruyen exactamente desde los 41 archivos diarios del paquete v2 (H30; `scripts/11_median_distance.py`); `K_hi` por día desde el GPS crudo: 🚫 (H4, D7) |
 | §4, Fig. 3 | Fusión hexágono‑hora | `panel.py` | ✅ sobre las bases finales del paquete; 🚫 desde el GPS crudo (D7) |
 | §3.2 / H1 | UTC → `America/Santiago` | `timeutils/local_time.py` | ⏳ verificada en exploración (H18), **sin código todavía** (Fase 5) |
 | §4.2 | Regresores `D_hi`, referencias, D+E | `demographics/shares.py`, `config.py` | ✅ |
@@ -35,15 +36,15 @@
 | §4.2.3 | I de Moran (0,4694 / 0,4756) | `inference/moran.py` | 🟡 la lectura literal (0,419 / 0,430) **no reproduce**; las alternativas se acercan a ~1–2 % pero la especificación no está identificada (H28); `scripts/09_moran.py` |
 | §4.2.1 | Cameron–Trivedi (7,73) | `inference/dispersion.py` | ✅ 7,750 (0,26 %, H27); `scripts/08_dispersion_test.py` |
 | §4.2.1 | π (probabilidad de cero estructural) | `inference/zero_inflation.py` | ℹ️ diagnóstico (el paper no reporta π): máximo del perfil en π = 0, IC 95 % [0, ~10⁻⁴] (H29); `scripts/10_zero_inflation.py` |
-| Tablas 4–5 | Estrellas de significancia | `reporting/significance.py` | 🟡 calculadas con 3 variantes sobre `00_data` (`paper_text` 50/88, `authors_script` 61/88, `iid`); **no todas coinciden** (H25, H26, D3). Diagnóstico aislado con `data_base` (**no es réplica**): `validation/stars_diagnosis.py`, `scripts/07_stars_diagnosis.py` |
+| Tablas 4–5 | Estrellas de significancia | `reporting/significance.py` | ✅ **88/88 contra las tablas regeneradas por los autores** (Tabla 4 con `paper_text`, Tabla 5 con `authors_script`; H31, D3); contra las estrellas impresas en el paper no coinciden (50/88 y 61/88; la propia referencia de los autores, 23/44 y 38/44). Diagnóstico aislado con el `data_base` de 2 miércoles (**no es réplica**): `validation/stars_diagnosis.py`, `scripts/07_stars_diagnosis.py` |
 
 ## Resultados y figuras
 
 | Paper | Qué es | Módulo | Estado |
 |---|---|---|---|
 | Tabla 2 | Descriptivos de la población flotante | `reporting/table2.py` | ✅ Mean/Std/% (H15); `scripts/01_table2.py` |
-| Tabla 2, Wasserstein y ranking | Movilidad mañana→tarde por grupo | `demographics/mobility.py` | 🟡 implementado como describe el paper; **no reproduce** los valores (error máx. 0,14; 12/15 rankings; H24); `scripts/05_mobility.py` |
-| Tablas 4 y 5 | Efectos marginales (4 columnas) | `reporting/marginal_tables.py` | 🟡 4 de 4 columnas con valores; estrellas calculadas pero no todas coinciden (H25); `scripts/02_distance_tables.py`, `03_zinb_tables.py` y `06_inference.py` |
+| Tabla 2, Wasserstein y ranking | Movilidad mañana→tarde por grupo | `demographics/mobility.py` | 🟡 lectura determinista del texto (error máx. 0,14; 12/15 rankings). Método de los autores **identificado** (muestra aleatoria de 5.000 hexágonos sin semilla): los valores publicados no son reproducibles exactamente; con 200 semillas, 13/15 caen en la banda del 95 % y los extremos son estables. Cálculo con semillas: `demographics/mobility.py` (`mobility_over_seeds`, `summarize_seeds`) y `scripts/12_mobility_seeds.py` (H24, D10); lectura determinista: `scripts/05_mobility.py` |
+| Tablas 4 y 5 | Efectos marginales (4 columnas) | `reporting/marginal_tables.py` | ✅ 4 de 4 columnas con valores a la precisión impresa y estrellas 88/88 contra las tablas regeneradas por los autores (H23, H31); `scripts/02_distance_tables.py`, `03_zinb_tables.py` y `06_inference.py` |
 | Figs. 1, 2 | Mapas de población por GSE y de pings | `figures/maps.py` | ⏳ |
 | Figs. 6, 8, 9, 10 | Efectos marginales por GSE/edad | `figures/marginal_effects.py` | ⏳ |
 | Fig. 7 | Gramos de NOx/PM | `reporting/emissions.py` | ⏳ (D10) |
@@ -59,6 +60,9 @@ Las cifras publicadas están en [`reference/paper_tables/`](../reference/paper_t
 | Tablas 4 y 5, columnas de distancia (39 + 39 celdas) | `python scripts/02_distance_tables.py` | ✅ diferencia máxima 5·10⁻⁵ (4 decimales) |
 | Mediana de conteos (178.304 filas × 2 columnas) | `python scripts/04_median_counts.py` (~1 min) | ✅ igualdad exacta con la base del paper |
 | Tablas 4 y 5, columna ZINB (13 + 13 celdas) | `python scripts/03_zinb_tables.py` (~2 min) | ✅ dif. máx. 5,7·10⁻⁵ (T4) y 4,4·10⁻⁵ (T5); tolerancia = precisión impresa, 6·10⁻⁵ (D2, acordado 2026-10-10) |
+| Mediana de distancia y tiempo (178.304 filas × 3 columnas) | `python scripts/11_median_distance.py` (~30 s) | ✅ igualdad exacta con la base del paper (H30) |
+| Wasserstein de la Tabla 2 con 200 semillas del método de los autores | `python scripts/12_mobility_seeds.py --use-reference` | 🟡 13/15 valores publicados dentro de la banda del 95 %, extremos estables; no es reproducción exacta (muestra sin semilla, H24) |
+| Estrellas contra las Tablas 4 y 5 regeneradas por los autores (44 + 44 celdas) | `pytest tests/validation/test_authors_reference.py` | ✅ 44/44 (Tabla 4, cluster por comuna) y 44/44 (Tabla 5, variante del script de los autores, H31) |
 
 ## Convención de documentación
 

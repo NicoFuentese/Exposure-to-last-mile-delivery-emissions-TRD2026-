@@ -254,3 +254,16 @@ def load_mobility_reference() -> pd.Series:
     """
     df = pd.read_csv(config.MOBILITY_DIR / "wasserstein_w1_utm_pooled.csv")
     return df.set_index("group")["w1_m"]
+
+
+MOBILITY_SEEDS_FILE = "wasserstein_authors_seeds_km.csv"
+
+
+def load_mobility_seeds_reference() -> pd.DataFrame:
+    """W1 en km de los 15 grupos por semilla, con el método del script de los autores.
+
+    Una fila por semilla (índice `seed`) y una columna por grupo de la Tabla 2
+    (`reference/mobility/`). Son agregados calculados por nosotros sobre los datos confidenciales,
+    no cifras del paper (AGENTS.md H24).
+    """
+    return pd.read_csv(config.MOBILITY_DIR / MOBILITY_SEEDS_FILE, index_col="seed")
