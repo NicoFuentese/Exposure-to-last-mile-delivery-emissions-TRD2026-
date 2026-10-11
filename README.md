@@ -8,6 +8,16 @@ El paper cruza, en una grilla **hexágono H3 (res. 9) × hora**, la actividad de
 
 > **Datos confidenciales.** Los datos del paper son confidenciales y no están en este repositorio. Sin ellos funcionan las pruebas sintéticas; los scripts de reproducción los necesitan (ver [Datos](#datos)).
 
+## Resultados
+
+La réplica reproduce los resultados del paper con los mismos valores y confirma sus conclusiones cualitativas principales: la **U invertida por nivel socioeconómico**, el **pico de exposición en 25–34 años** y el **cambio de C1b entre el enfoque dinámico y el estático**. Estas conclusiones se mantienen al corregir la zona horaria de los camiones. No se confirman la cifra del 24 % de mayor exposición de hombres ni la significancia estadística de varios efectos que el paper imprime. Detalle y cautelas en [`docs/conclusiones.md`](docs/conclusiones.md).
+
+| Modelo dinámico (Fig. 6) | Modelo estático (Fig. 9) |
+|---|---|
+| ![Efectos marginales por grupo socioeconómico, modelo dinámico](docs/figures/fig6_seg_dynamic.png) | ![Efectos marginales por grupo socioeconómico, modelo estático](docs/figures/fig9_seg_static.png) |
+
+*Efecto marginal por grupo socioeconómico: ZINB (azul, eje izquierdo, vehículos) y OLS con distancia positiva (rojo, eje derecho, metros). Como en el paper, el eje derecho está reescalado: las figuras comparan formas, no magnitudes entre series.*
+
 **Documentación**
 
 - [`AGENTS.md`](AGENTS.md): metodología verificada, hallazgos, decisiones y estado del trabajo (referencia principal).
@@ -81,6 +91,8 @@ Si PowerShell bloquea la activación, habilita los scripts solo para esa sesión
 
 Los datos del paper son **confidenciales** (*"The data that has been used is confidential"*) y **no se versionan**: `data/` está en `.gitignore`. No los subas a servicios externos ni los incluyas en commits.
 
+Los scripts de reproducción leen el paquete de replicación de los autores desde `data/replication_package_v2/`. Qué contiene cada archivo está descrito en [`AGENTS.md`](AGENTS.md) (§8.1).
+
 ## Reproducir resultados
 
 Con el entorno activo y los datos disponibles en `data/`:
@@ -102,6 +114,8 @@ Con el entorno activo y los datos disponibles en `data/`:
 | `scripts/13_local_time_sensitivity.py` | Sensibilidad en hora local (`America/Santiago`) de las Tablas 4 y 5 | ~2 min |
 | `scripts/14_figures.py` | Figs. 6, 7, 8, 9 y 10 | segundos |
 | `scripts/15_maps.py` | Fig. 1 y sustituto de la Fig. 2 | ~30 s |
+
+Los scripts son independientes entre sí, salvo uno: **ejecuta `03_zinb_tables.py` antes que `14_figures.py`**, porque las figuras leen las tablas que deja el 03 (si faltan, el 14 se detiene y lo avisa).
 
 Cada script se ejecuta con `python scripts/NN_nombre.py` y escribe en `outputs/` (los resultados de la réplica en `outputs/as_published/`). Los que validan contra cifras publicadas (`reference/paper_tables/`) terminan con código 1 si algo difiere de su redondeo; los de diagnóstico y sensibilidad terminan siempre con 0. Los scripts 14 y 15 aceptan `--publish` para copiar las figuras autorizadas a `docs/figures/`. El detalle de cada script está en [`scripts/README.md`](scripts/README.md).
 
