@@ -30,7 +30,7 @@ class Variant(StrEnum):
     """Variante de la réplica (AGENTS.md §7.3-D1). Cambia el resultado, no el código."""
 
     AS_PUBLISHED = "as_published"  # tal cual el paquete: hora y miércoles en UTC
-    LOCAL_TIME = "local_time"  # America/Santiago; solo conteos, horas locales 7-19
+    LOCAL_TIME = "local_time"  # America/Santiago; conteos y distancia, horas locales 7-19
 
 
 # --- Grilla y tiempo -------------------------------------------------------------------

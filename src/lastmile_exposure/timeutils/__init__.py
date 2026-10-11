@@ -3,5 +3,5 @@
 Paper: §3
 Código de los autores: 01_extract_wednesday.R, 03_*.R
 Hallazgos (AGENTS.md §7): H1, H18, H19, D1
-Estado: pendiente (Fase 5).
+Estado: implementado (Fase 5): `local_time` convierte los marcos diarios a hora local.
 """

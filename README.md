@@ -176,6 +176,7 @@ python scripts/04_median_counts.py      # mediana de conteos desde los 42 archiv
 python scripts/11_median_distance.py    # mediana de distancia y tiempo desde los 41 archivos diarios (~30 s)
 python scripts/05_mobility.py --use-reference   # Wasserstein/movilidad (Tabla 2); sin la bandera tarda ~10 min
 python scripts/12_mobility_seeds.py --use-reference   # Wasserstein con el metodo de los autores y 200 semillas; sin la bandera ~40 min con 8 procesos
+python scripts/13_local_time_sensitivity.py   # sensibilidad en hora local, Tablas 4 y 5 (~2 min)
 python scripts/06_inference.py          # SE por comuna y estrellas de las Tablas 4 y 5 (~8 min)
 python scripts/08_dispersion_test.py    # Cameron-Trivedi (7,73): rapido
 python scripts/09_moran.py              # I de Moran (0,4694 / 0,4756): rapido; la especificacion no esta identificada
@@ -211,7 +212,7 @@ ruff format .     # formato
 | Test de Cameron–Trivedi (7,73): 7,750, dentro de la tolerancia | ✅ |
 | I de Moran: la lectura literal no reproduce; las alternativas solo se acercan (~1–2 %), especificación no identificada | 🟡 |
 | π (el paper no lo reporta): máximo del perfil en π = 0, IC 95 % [0, ~10⁻⁴]; diagnóstico | ℹ️ |
-| Sensibilidad en hora local (`America/Santiago`), ahora con conteos y distancia | ⏳ |
+| Sensibilidad en hora local (`America/Santiago`), conteos y distancia, horas 7–19: las cuatro conclusiones del paper se mantienen (`scripts/13_local_time_sensitivity.py`) | ✅ |
 | Figuras (1, 2, 6–10) | ⏳ |
 | Extensión a métricas de ruido | ⏳ |
 

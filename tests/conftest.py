@@ -105,3 +105,21 @@ def daily_counts():
     from lastmile_exposure.io.daily_counts import load_daily_counts
 
     return load_daily_counts()
+
+
+@pytest.fixture(scope="session")
+def daily_counts_all_hours():
+    """Conteos diarios con las 24 horas UTC (necesarios para la hora local, Fase 5)."""
+    _require_data()
+    from lastmile_exposure.io.daily_counts import load_daily_counts
+
+    return load_daily_counts(hours=None)
+
+
+@pytest.fixture(scope="session")
+def daily_metrics_all_hours():
+    """Distancia y tiempo diarios con las 24 horas UTC (necesarios para la hora local, Fase 5)."""
+    _require_data()
+    from lastmile_exposure.io.daily_metrics import load_daily_metrics
+
+    return load_daily_metrics(hours=None)
