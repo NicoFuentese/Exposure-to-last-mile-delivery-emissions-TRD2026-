@@ -22,6 +22,7 @@ PACKAGE_DIR = DATA_DIR / "replication_package_v2"  # paquete vigente (recibido 2
 LEGACY_PACKAGE_DIR = DATA_DIR / "replication_package"
 PROCESSED_DIR = DATA_DIR / "processed"  # datos derivados (ignorado por git)
 OUTPUTS_DIR = ROOT / "outputs"  # resultados; ignorado por git por defecto
+FIGURES_DIR = ROOT / "docs" / "figures"  # figuras finales que SÍ se versionan (solo coeficientes)
 REFERENCE_DIR = ROOT / "reference" / "paper_tables"  # cifras publicadas (sí se versionan)
 R_ORACLE_DIR = ROOT / "reference" / "r_oracle"  # contraste del ZINB con pscl (R); no es del paper
 
