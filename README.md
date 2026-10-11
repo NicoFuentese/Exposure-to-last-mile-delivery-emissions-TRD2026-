@@ -177,6 +177,8 @@ python scripts/11_median_distance.py    # mediana de distancia y tiempo desde lo
 python scripts/05_mobility.py --use-reference   # Wasserstein/movilidad (Tabla 2); sin la bandera tarda ~10 min
 python scripts/12_mobility_seeds.py --use-reference   # Wasserstein con el metodo de los autores y 200 semillas; sin la bandera ~40 min con 8 procesos
 python scripts/13_local_time_sensitivity.py   # sensibilidad en hora local, Tablas 4 y 5 (~2 min)
+python scripts/14_figures.py --publish   # Figs. 6, 7, 8, 9 y 10 (segundos); copia a docs/figures/
+python scripts/15_maps.py --publish      # Fig. 1 y sustituto de la Fig. 2 (~30 s); copia los PNG a docs/figures/
 python scripts/06_inference.py          # SE por comuna y estrellas de las Tablas 4 y 5 (~8 min)
 python scripts/08_dispersion_test.py    # Cameron-Trivedi (7,73): rapido
 python scripts/09_moran.py              # I de Moran (0,4694 / 0,4756): rapido; la especificacion no esta identificada
@@ -213,7 +215,9 @@ ruff format .     # formato
 | I de Moran: la lectura literal no reproduce; las alternativas solo se acercan (~1–2 %), especificación no identificada | 🟡 |
 | π (el paper no lo reporta): máximo del perfil en π = 0, IC 95 % [0, ~10⁻⁴]; diagnóstico | ℹ️ |
 | Sensibilidad en hora local (`America/Santiago`), conteos y distancia, horas 7–19: las cuatro conclusiones del paper se mantienen (`scripts/13_local_time_sensitivity.py`) | ✅ |
-| Figuras (1, 2, 6–10) | ⏳ |
+| Figuras 6, 8, 9 y 10 (mismos puntos que las tablas; `docs/figures/`) y Fig. 7 (factores derivados de las barras impresas) | ✅ |
+| Fig. 1 (mapas): patrón reproducido, escalas 1.511 y 7.073 frente a 1600 y 7000 del paper | 🟡 |
+| Fig. 2 (puntos GPS por hexágono): no reproducible sin el GPS crudo; hay un sustituto rotulado (PNG en `docs/figures/`) | 🚫 |
 | Extensión a métricas de ruido | ⏳ |
 
 Ya están reproducidos, con código en el paquete y scripts ejecutables, la **Tabla 2** y las tres columnas de distancia (OLS) de las **Tablas 4 y 5** (al redondeo del paper), y la columna **ZINB** (a la precisión impresa: con estos datos el máximo de la verosimilitud está en π = 0, es decir la NB; el ZINB de `pscl` se detiene antes del máximo). Los detalles, incluidas las diferencias entre el paper y el código de los autores (por ejemplo, que la hora de los conteos de vehículos está en UTC), están en `AGENTS.md`.

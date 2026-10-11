@@ -56,6 +56,11 @@ def load_table2() -> pd.DataFrame:
     return load_reference("table2_floating_population")
 
 
+def load_fig7_bars() -> pd.DataFrame:
+    """Etiquetas de las barras de la Fig. 7 (`label`, `nox_g`, `pm_g`), leídas de ella (H36)."""
+    return load_reference("fig7_bars")
+
+
 def load_table4() -> pd.DataFrame:
     return load_reference("table4_dynamic", text_stars=True)
 

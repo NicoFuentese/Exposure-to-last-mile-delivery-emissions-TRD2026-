@@ -45,9 +45,10 @@
 | Tabla 2 | Descriptivos de la población flotante | `reporting/table2.py` | ✅ Mean/Std/% (H15); `scripts/01_table2.py` |
 | Tabla 2, Wasserstein y ranking | Movilidad mañana→tarde por grupo | `demographics/mobility.py` | 🟡 lectura determinista del texto (error máx. 0,14; 12/15 rankings). Método de los autores **identificado** (muestra aleatoria de 5.000 hexágonos sin semilla): los valores publicados no son reproducibles exactamente; con 200 semillas, 13/15 caen en la banda del 95 % y los extremos son estables. Cálculo con semillas: `demographics/mobility.py` (`mobility_over_seeds`, `summarize_seeds`) y `scripts/12_mobility_seeds.py` (H24, D10); lectura determinista: `scripts/05_mobility.py` |
 | Tablas 4 y 5 | Efectos marginales (4 columnas) | `reporting/marginal_tables.py` | ✅ 4 de 4 columnas con valores a la precisión impresa y estrellas 88/88 contra las tablas regeneradas por los autores (H23, H31); `scripts/02_distance_tables.py`, `03_zinb_tables.py` y `06_inference.py` |
-| Figs. 1, 2 | Mapas de población por GSE y de pings | `figures/maps.py` | ⏳ |
-| Figs. 6, 8, 9, 10 | Efectos marginales por GSE/edad | `figures/marginal_effects.py` | ⏳ |
-| Fig. 7 | Gramos de NOx/PM | `reporting/emissions.py` | ⏳ (D10) |
+| Fig. 1 | Mapas de población de SEG AB y C1b (mañana y tarde) | `figures/maps.py`, `scripts/15_maps.py` | 🟡 patrón reproducido; escalas 1.511 y 7.073 frente a 1600 y 7000 (H35) |
+| Fig. 2 | Puntos GPS por hexágono | `figures/maps.py` (`plot_vehicle_proxy`) | 🚫 no reproducible sin el GPS crudo; sustituto rotulado con vehículos por hexágono, PNG en `docs/figures/` (H35) |
+| Figs. 6, 8, 9, 10 | Efectos marginales por GSE/edad (ZINB y OLS `K̃>0`, eje doble) | `figures/marginal_effects.py`, `scripts/14_figures.py` | ✅ mismos puntos que las tablas impresas; eje derecho reescalado como en el código de los autores (H34); versionadas en `docs/figures/` |
+| Fig. 7 | Gramos de NOx/PM | `reporting/emissions.py`, `figures/emissions.py` | 🟡 reproduce las 12 etiquetas con un factor derivado de ellas, no independiente (H36, D10) |
 | Extensión | Métrica de ruido | `exposure/noise.py` | ⏳ (Fase 8) |
 
 ## Validación contra el paper
@@ -63,6 +64,8 @@ Las cifras publicadas están en [`reference/paper_tables/`](../reference/paper_t
 | Mediana de distancia y tiempo (178.304 filas × 3 columnas) | `python scripts/11_median_distance.py` (~30 s) | ✅ igualdad exacta con la base del paper (H30) |
 | Wasserstein de la Tabla 2 con 200 semillas del método de los autores | `python scripts/12_mobility_seeds.py --use-reference` | 🟡 13/15 valores publicados dentro de la banda del 95 %, extremos estables; no es reproducción exacta (muestra sin semilla, H24) |
 | Sensibilidad en hora local (Tablas 4 y 5, horas 7–19) | `python scripts/13_local_time_sensitivity.py` (~2 min) | 🟡 sensibilidad, sin objetivo del paper: las cuatro conclusiones se mantienen y los coeficientes cambian ~8–12 % en mediana (H33) |
+| Figs. 6, 7, 8, 9 y 10 | `python scripts/14_figures.py --publish` (segundos) | ✅ mismos puntos que las tablas impresas (Figs. 6, 8, 9, 10); 🟡 Fig. 7 con factores derivados |
+| Fig. 1 y sustituto de la Fig. 2 | `python scripts/15_maps.py --publish` (~30 s) | 🟡 Fig. 1: patrón reproducido, escalas 1.511 y 7.073 frente a 1600 y 7000 (H35) |
 | Estrellas contra las Tablas 4 y 5 regeneradas por los autores (44 + 44 celdas) | `pytest tests/validation/test_authors_reference.py` | ✅ 44/44 (Tabla 4, cluster por comuna) y 44/44 (Tabla 5, variante del script de los autores, H31) |
 
 ## Convención de documentación

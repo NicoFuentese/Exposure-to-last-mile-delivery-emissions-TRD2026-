@@ -117,11 +117,16 @@ def plot_effects(table: pd.DataFrame, group: str, *, title: str | None = None) -
     return fig
 
 
-def save_figure(fig: Figure, base_path: Path, *, dpi: int = 300) -> list[Path]:
-    """Guarda `fig` como PNG y PDF (`base_path` sin extensión); devuelve las rutas escritas."""
+def save_figure(
+    fig: Figure, base_path: Path, *, dpi: int = 300, suffixes: tuple[str, ...] = (".png", ".pdf")
+) -> list[Path]:
+    """Guarda `fig` como PNG y PDF (o los `suffixes` pedidos); devuelve las rutas escritas.
+
+    `base_path` va sin extensión.
+    """
     base_path.parent.mkdir(parents=True, exist_ok=True)
     paths = []
-    for suffix in (".png", ".pdf"):
+    for suffix in suffixes:
         path = base_path.with_suffix(suffix)
         fig.savefig(path, dpi=dpi, facecolor="white")
         paths.append(path)
