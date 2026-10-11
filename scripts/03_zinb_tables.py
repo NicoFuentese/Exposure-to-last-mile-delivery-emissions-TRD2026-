@@ -33,6 +33,7 @@ from lastmile_exposure.reporting.marginal_tables import (
 from lastmile_exposure.validation.paper_tables import (
     MARGINAL_TOLERANCE,
     ZINB_TOLERANCE,
+    column_summary,
     compare_columns,
     load_table4,
     load_table5,
@@ -72,6 +73,7 @@ def main() -> int:
         table.round(4).to_csv(path, index=False)
 
         report = compare_columns(table, reference, TOLERANCES)
+        column_summary(report).to_csv(out_dir / f"comparison_{name}.csv", index=False)
         good = bool(report["ok"].all())
         ok &= good
         print(f"  -> {path}")

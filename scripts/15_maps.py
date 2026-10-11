@@ -7,6 +7,8 @@ Uso (con el entorno activo, desde la raíz del repositorio):
 Entrada: data/replication_package_v2/00_data/ (datos confidenciales, no versionados):
          miercoles_rm.csv (Fig. 1) y hexagon_model_median_wednesdays_RM.csv (sustituto de la Fig. 2)
 Salida:  outputs/as_published/figures/fig1_seg_population.png (200 dpi) y .pdf (vectorial)
+         outputs/as_published/tables/fig1_scales.csv (máximos de la escala de la Fig. 1 frente
+         a los del paper: agregados, sin valores por hexágono; lo lee el informe de 16_run_all.py)
          outputs/as_published/figures/fig2_proxy_vehicles.png (200 dpi) y .pdf (vectorial)
          Con --publish, además docs/figures/fig1_seg_population.png y fig2_proxy_vehicles.png
          (150 dpi, solo PNG)
@@ -31,6 +33,8 @@ código 0: no hay una cifra del paper que validar más allá de la forma y la es
 import argparse
 import sys
 
+import pandas as pd
+
 from lastmile_exposure import config
 from lastmile_exposure.demographics.mobility import group_masses
 from lastmile_exposure.figures.maps import (
@@ -45,6 +49,8 @@ from lastmile_exposure.figures.maps import (
 from lastmile_exposure.figures.marginal_effects import save_figure
 from lastmile_exposure.io.panel import load_counts_dataset, load_panel
 
+PAPER_SCALE_END = {"AB": 1600.0, "C1b": 7000.0}  # lo que imprime la Fig. 1 del paper (p.6)
+
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
@@ -58,6 +64,17 @@ def main() -> int:
     print(f"Hexagonos dentro de los limites del mapa: {len(data['hexes'])} de {len(masses.hexes)}")
     for label, vmax in data["vmax"].items():
         print(f"  {label}: escala 0 - {vmax:,.0f} (el paper imprime 1600 para AB y 7000 para C1b)")
+    tables_dir = config.OUTPUTS_DIR / config.Variant.AS_PUBLISHED.value / "tables"
+    tables_dir.mkdir(parents=True, exist_ok=True)
+    pd.DataFrame(
+        {
+            "group": list(data["vmax"]),
+            "ours_max": [float(v) for v in data["vmax"].values()],
+            "paper_max": [PAPER_SCALE_END[g] for g in data["vmax"]],
+        }
+    ).assign(ratio=lambda d: d["ours_max"] / d["paper_max"]).to_csv(
+        tables_dir / "fig1_scales.csv", index=False
+    )
     fig = plot_fig1(masses)
     paths = save_figure(fig, out_dir / FIG1_NAME, dpi=200)
     print(f"{FIG1_NAME}: {', '.join(p.name for p in paths)}")

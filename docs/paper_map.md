@@ -66,6 +66,7 @@ Las cifras publicadas están en [`reference/paper_tables/`](../reference/paper_t
 | Sensibilidad en hora local (Tablas 4 y 5, horas 7–19) | `python scripts/13_local_time_sensitivity.py` (~2 min) | 🟡 sensibilidad, sin objetivo del paper: las cuatro conclusiones se mantienen y los coeficientes cambian ~8–12 % en mediana (H33) |
 | Figs. 6, 7, 8, 9 y 10 | `python scripts/14_figures.py --publish` (segundos) | ✅ mismos puntos que las tablas impresas (Figs. 6, 8, 9, 10); 🟡 Fig. 7 con factores derivados |
 | Fig. 1 y sustituto de la Fig. 2 | `python scripts/15_maps.py --publish` (~30 s) | 🟡 Fig. 1: patrón reproducido, escalas 1.511 y 7.073 frente a 1600 y 7000 (H35) |
+| **Todo lo anterior y el informe de reproducción** | `python scripts/16_run_all.py` (~9 min; `--mode quick` ~4 min) | informe en `outputs/reproduction/report.md`: ✅ coincide, 🟡 desviación documentada, ℹ️ informativo, ❌ falla, ⏭️ omitido (`runner.py`, `validation/reproduction.py`) |
 | Estrellas contra las Tablas 4 y 5 regeneradas por los autores (44 + 44 celdas) | `pytest tests/validation/test_authors_reference.py` | ✅ 44/44 (Tabla 4, cluster por comuna) y 44/44 (Tabla 5, variante del script de los autores, H31) |
 
 ## Convención de documentación

@@ -77,7 +77,7 @@ def main() -> int:
     paths = save_figure(fig, out_dir / FIG7_NAME)
     if args.publish:
         save_figure(fig, config.FIGURES_DIR / FIG7_NAME)
-    grams.round(2).to_csv(out_dir / f"{FIG7_NAME}_data.csv", index=False)
+    grams.round(4).to_csv(out_dir / f"{FIG7_NAME}_data.csv", index=False)
     same = (
         grams[["nox_g", "pm_g"]].round(1).to_numpy() == bars[["nox_g", "pm_g"]].to_numpy()
     ).sum()

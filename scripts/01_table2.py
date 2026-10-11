@@ -18,6 +18,7 @@ from lastmile_exposure.io.panel import load_panel
 from lastmile_exposure.reporting.table2 import table2
 from lastmile_exposure.validation.paper_tables import (
     TABLE2_TOLERANCES,
+    column_summary,
     compare_columns,
     load_table2,
 )
@@ -30,6 +31,7 @@ def main() -> int:
     result.round(4).to_csv(out_dir / "table2.csv", index=False)
 
     report = compare_columns(result, load_table2(), TABLE2_TOLERANCES)
+    column_summary(report).to_csv(out_dir / "comparison_table2.csv", index=False)
     print(f"Tabla 2 escrita en {out_dir / 'table2.csv'}")
     print(
         f"Celdas comparadas con el paper: {len(report)}; dentro de tolerancia: {report['ok'].sum()}"

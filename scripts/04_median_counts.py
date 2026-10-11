@@ -15,12 +15,16 @@ EXACTAMENTE con `median_vehicles` y `count_wednesdays` de la base del paper; si 
 código 1. Además informa cuánto cambian los resultados con las dos variantes documentadas:
 (a) mediana sobre todos los días contando los ausentes como 0 (texto del paper) y (b) excluyendo
 el feriado 2024-05-01 (41 miércoles, D4). Solo variante `as_published` (hora UTC).
+Escribe `outputs/as_published/tables/median_counts_check.csv` (igualdad y diferencia máxima por
+columna: agregados, sin filas individuales), que lee el informe de `16_run_all.py`.
 """
 
 import sys
 
 import numpy as np
+import pandas as pd
 
+from lastmile_exposure import config
 from lastmile_exposure.exposure.vehicles_counts import count_outside_grid, median_vehicles
 from lastmile_exposure.io.daily_counts import load_daily_counts
 from lastmile_exposure.io.panel import load_counts_dataset, load_panel
@@ -52,6 +56,21 @@ def main() -> int:
     print(f"Filas comparadas con la base del paper: {len(merged):,} de {len(grid):,}")
     print(f"  median_vehicles identico: {same_median}")
     print(f"  count_wednesdays identico: {same_count}")
+    summary = pd.DataFrame(
+        {
+            "check": ["median_vehicles", "count_wednesdays"],
+            "identical": [same_median, same_count],
+            "n_rows": len(merged),
+            "n_expected": len(grid),
+            "max_abs_diff": [
+                float((merged[f"{c}_rebuilt"] - merged[f"{c}_paper"]).abs().max())
+                for c in ("median_vehicles", "count_wednesdays")
+            ],
+        }
+    )
+    out_dir = config.OUTPUTS_DIR / config.Variant.AS_PUBLISHED.value / "tables"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    summary.to_csv(out_dir / "median_counts_check.csv", index=False)
     print(
         f"  ceros: {(rebuilt['median_vehicles'] == 0).mean():.4f} | "
         f"medianas x,5: {int((rebuilt['median_vehicles'] % 1 == 0.5).sum()):,} | "

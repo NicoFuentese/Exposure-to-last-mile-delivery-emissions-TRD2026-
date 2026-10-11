@@ -9,6 +9,7 @@ Aquí solo hay constantes; nada de lógica. Si un número del paper se usa en m�
 módulo, debe vivir en este archivo.
 """
 
+import os
 from enum import StrEnum
 from pathlib import Path
 
@@ -21,7 +22,9 @@ PACKAGE_DIR = DATA_DIR / "replication_package_v2"  # paquete vigente (recibido 2
 # de `00_data`. Nada del pipeline lee de aquí.
 LEGACY_PACKAGE_DIR = DATA_DIR / "replication_package"
 PROCESSED_DIR = DATA_DIR / "processed"  # datos derivados (ignorado por git)
-OUTPUTS_DIR = ROOT / "outputs"  # resultados; ignorado por git por defecto
+# resultados; ignorado por git por defecto. `LASTMILE_OUTPUTS_DIR` la redirige (las pruebas que
+# ejecutan scripts de verdad la usan para no pisar los resultados reales)
+OUTPUTS_DIR = Path(os.environ.get("LASTMILE_OUTPUTS_DIR", ROOT / "outputs"))
 FIGURES_DIR = ROOT / "docs" / "figures"  # figuras finales que SÍ se versionan (solo coeficientes)
 REFERENCE_DIR = ROOT / "reference" / "paper_tables"  # cifras publicadas (sí se versionan)
 R_ORACLE_DIR = ROOT / "reference" / "r_oracle"  # contraste del ZINB con pscl (R); no es del paper

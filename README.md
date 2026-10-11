@@ -95,16 +95,26 @@ Los scripts de reproducción leen el paquete de replicación de los autores desd
 
 ## Reproducir resultados
 
-Con el entorno activo y los datos disponibles en `data/`:
+Con el entorno activo y los datos disponibles en `data/`, un solo comando regenera todo y deja un **informe de reproducción** (qué coincide con el paper, qué no y qué cambió):
+
+```bash
+python scripts/16_run_all.py                # modo estándar (~9 min)
+python scripts/16_run_all.py --mode quick   # ~4 min: sin los pasos más lentos
+python scripts/16_run_all.py --publish      # además publica las figuras y el informe
+```
+
+El informe queda en `outputs/reproduction/report.md` (y `report.csv`). Con `--publish`, el informe también se copia a `docs/reproduction_report.md` y las figuras autorizadas a `docs/figures/`. Un paso que falla no detiene a los demás; el código de salida es 0 si el informe no tiene fallas. También acepta `--dry-run` (muestra el plan), `--report-only`, `--only 03,14` y `--skip 06`.
+
+O ejecuta los scripts por separado:
 
 | Script | Qué reproduce | Duración |
 |---|---|---|
-| `scripts/01_table2.py` | Tabla 2 (población flotante) | ~30 s |
-| `scripts/02_distance_tables.py` | Columnas de distancia (OLS) de las Tablas 4 y 5 | ~15 s |
-| `scripts/03_zinb_tables.py` | Columna ZINB de las Tablas 4 y 5 | ~2 min |
-| `scripts/04_median_counts.py` | Mediana de conteos desde los 42 archivos diarios | ~1 min |
+| `scripts/01_table2.py` | Tabla 2 (población flotante) | ~10 s |
+| `scripts/02_distance_tables.py` | Columnas de distancia (OLS) de las Tablas 4 y 5 | ~10 s |
+| `scripts/03_zinb_tables.py` | Columna ZINB de las Tablas 4 y 5 | ~1 min |
+| `scripts/04_median_counts.py` | Mediana de conteos desde los 42 archivos diarios | ~30 s |
 | `scripts/05_mobility.py` | Wasserstein y ranking de movilidad (Tabla 2), según el texto del paper | ~10 min; `--use-reference` es instantáneo |
-| `scripts/06_inference.py` | Errores estándar por comuna y estrellas de las Tablas 4 y 5 | ~8 min |
+| `scripts/06_inference.py` | Errores estándar por comuna y estrellas de las Tablas 4 y 5 | ~1 min |
 | `scripts/07_stars_diagnosis.py` | **Diagnóstico, no es una réplica** (usa la base de 2 miércoles; no usar sus resultados) | — |
 | `scripts/08_dispersion_test.py` | Test de Cameron–Trivedi (7,73) | ~10 s |
 | `scripts/09_moran.py` | I de Moran (0,4694 y 0,4756) | segundos |
@@ -114,8 +124,9 @@ Con el entorno activo y los datos disponibles en `data/`:
 | `scripts/13_local_time_sensitivity.py` | Sensibilidad en hora local (`America/Santiago`) de las Tablas 4 y 5 | ~2 min |
 | `scripts/14_figures.py` | Figs. 6, 7, 8, 9 y 10 | segundos |
 | `scripts/15_maps.py` | Fig. 1 y sustituto de la Fig. 2 | ~30 s |
+| `scripts/16_run_all.py` | Ejecuta los pasos anteriores en orden y arma el informe de reproducción | ~4 min (`--mode quick`) a ~9 min (estándar) |
 
-Los scripts son independientes entre sí, salvo uno: **ejecuta `03_zinb_tables.py` antes que `14_figures.py`**, porque las figuras leen las tablas que deja el 03 (si faltan, el 14 se detiene y lo avisa).
+Los scripts son independientes entre sí, salvo uno: **ejecuta `03_zinb_tables.py` antes que `14_figures.py`**, porque las figuras leen las tablas que deja el 03 (si faltan, el 14 se detiene y lo avisa). `16_run_all.py` ya respeta ese orden.
 
 Cada script se ejecuta con `python scripts/NN_nombre.py` y escribe en `outputs/` (los resultados de la réplica en `outputs/as_published/`). Los que validan contra cifras publicadas (`reference/paper_tables/`) terminan con código 1 si algo difiere de su redondeo; los de diagnóstico y sensibilidad terminan siempre con 0. Los scripts 14 y 15 aceptan `--publish` para copiar las figuras autorizadas a `docs/figures/`. El detalle de cada script está en [`scripts/README.md`](scripts/README.md).
 

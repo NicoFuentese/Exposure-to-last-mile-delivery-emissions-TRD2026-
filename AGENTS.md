@@ -15,7 +15,8 @@ Guía para agentes (y personas) que trabajen en este repositorio. Contiene lo ve
 - **Qué NO se reproduce exactamente:** las estrellas impresas del paper (los autores reconocen que no salen del método correcto), el I de Moran (0,419 / 0,430 frente a 0,4694 / 0,4756; especificación no identificada), el Wasserstein de la Tabla 2 (muestra aleatoria sin semilla: 13 de 15 valores dentro de la banda del 95 %), las escalas de color de la Fig. 1, la Fig. 7 (factores derivados de sus barras) y la Fig. 2 (necesita el GPS crudo; hay un sustituto rotulado).
 - **Dónde el paper o su código difieren de lo que dicen (con su hallazgo):** hora UTC en los camiones frente a hora local en la población (H1, H32; sensibilidad en H33: las conclusiones se mantienen); estrellas impresas calculadas con una base de 2 miércoles (H26, H32); cluster `NULL` en su ZINB estático (H26, H31); (1−π) aplicado dos veces en su efecto marginal (H10); columna «ZINB» que es la NB (H23, H29); distancia sin recorte por hexágono (H4); eje derecho reescalado en las Figs. 6–10 (H34).
 - **¿Se confirman las conclusiones del paper?** Sí en lo cualitativo (U invertida por GSE, pico en 25–34, cambio de C1b entre dinámico y estático), también al corregir la hora; no la cifra del 24 % de hombres ni la significancia de varios efectos impresos. Síntesis completa en `docs/conclusiones.md`.
-- **Siguiente:** (a) respuesta de los autores a la segunda ronda (§8.4) y actualizar H10, H26, H28 y D8; (b) un ejecutor que regenere todo con un comando; (c) Fase 8; (d) decisiones abiertas D5, D6, D8, D9 y D11 (§7.3).
+- **Siguiente:** (a) respuesta de los autores a la segunda ronda (§8.4) y actualizar H10, H26, H28 y D8; (b) Fase 8; (c) decisiones abiertas D5, D6, D8, D9 y D11 (§7.3).
+- **Reproducir todo:** `python scripts/16_run_all.py` regenera tablas y figuras y deja un informe de qué se reproduce en `outputs/reproduction/report.md` (~9 min; ver §12).
 - **Cómo trabajar aquí:** reglas en §1 y entorno, comandos y trampas conocidas en §12.
 
 ---
@@ -72,6 +73,7 @@ src/lastmile_exposure/      # paquete (layout src/, instalable en editable, sin 
 ├── exposure/               # variable resultado: vehicles_counts, vehicles_distance, aggregate, noise (futuro)
 ├── demographics/           # regresores D_hi (shares dinámicos y estáticos)
 ├── panel.py                # fusión hexágono-hora
+├── runner.py               # ejecutor final: corre los scripts en orden y registra cada paso (informe: validation/reproduction.py)
 ├── models/                 # zinb, ols, two_part, marginal_effects
 ├── inference/              # cluster por comuna, Moran, Cameron-Trivedi
 ├── reporting/              # tablas 2/4/5, estrellas, sensibilidad, emisiones (Fig. 7)
@@ -474,7 +476,8 @@ Regresores `X` (11): `genero_masc, gse_c1a, gse_c1b, gse_c2, gse_c3, gse_de (= g
 - **Fase 6 — Solicitud a los autores (D1, punto 3):** primera ronda **respondida** (2026-10-09/10; H32). Segunda ronda **redactada** con 5 consultas (Moran, muestra del Wasserstein, cluster `NULL`, columna ZINB = NB junto con el doble (1−π), y hora local de la población); la envía el usuario el lunes 2026-10-12. Al recibir la respuesta: actualizar H10, H26, H28 y D8 (§8.4).
 - **Fase 7 — Figuras:** ✅ (2026-10-11) Figs. 6, 8, 9 y 10 (H34), Fig. 1 (H35), Fig. 7 con factores derivados (H36) y un sustituto rotulado de la Fig. 2 (no hay GPS crudo); las figuras de coeficientes y los PNG de la Fig. 1 y del sustituto de la Fig. 2 se versionan en `docs/figures/`; los PDF vectoriales de los mapas quedan en `outputs/`. Las Figs. 3–5 son diagramas y no se replican.
 - **Fase 8 — Extensión a ruido** (objetivo posterior, §7 H17): reemplazar `median_vehicles` por la métrica de ruido reutilizando el pipeline, con hora local desde el inicio.
-- **Pendiente sin fase asignada:** un ejecutor que regenere todas las tablas y figuras con un comando y deje el cuadro de qué se reproduce (el usuario decide cuándo); y las decisiones abiertas D5, D6, D8, D9 y D11 (§7.3).
+- **Ejecutor final:** ✅ (2026-10-11) `scripts/16_run_all.py` (`runner.py` y `validation/reproduction.py`): regenera todo y deja el informe de reproducción; ver §12.
+- **Pendiente sin fase asignada:** las decisiones abiertas D5, D6, D8, D9 y D11 (§7.3).
 
 ---
 
@@ -494,9 +497,17 @@ Regresores `X` (11): `genero_masc, gse_c1a, gse_c1b, gse_c2, gse_c3, gse_de (= g
 Todo lo de esta sección es operativo y verificado en este proyecto (Windows 11, `uv`, Python 3.12). Comandos de reproducción por script: `README.md` y `scripts/README.md`; índice paper → módulo: `docs/paper_map.md`.
 
 **Pruebas y calidad**
-- `.venv/Scripts/python.exe -m pytest` corre todo (361 pruebas el 2026-10-11, ~16 min); `-m "not slow"` omite las que ajustan el ZINB completo. `tests/` son pruebas sintéticas (corren sin datos) y `tests/validation/` usan los datos reales (se saltan si `data/` no está).
+- `.venv/Scripts/python.exe -m pytest` corre todo (408 pruebas el 2026-10-11, ~16 min); `-m "not slow"` omite las que ajustan el ZINB completo. `tests/` son pruebas sintéticas (corren sin datos) y `tests/validation/` usan los datos reales (se saltan si `data/` no está).
 - `ruff check` y `ruff format` (línea máx. 100) deben quedar limpios. Cada módulo de `src/` abre con el docstring de la regla 1 de §2.1 (`tests/test_structure.py`).
 - Guardianes: `tests/test_diagnostic_isolation.py` (el diagnóstico con `data_base` no entra al pipeline, regla 8) y `tests/test_published_figures.py` (solo lo autorizado entra a `docs/figures/`, regla 3).
+
+**Ejecutor final (`scripts/16_run_all.py`)**
+- Corre los scripts en orden de dependencia, de a uno, y escribe en `outputs/reproduction/` el informe (`report.md`, `report.csv`), `run_log.json` y un log por script. Modos: `quick` (~4 min medidos; sin 05, 06, 10 y 12), `standard` (~9 min medidos, por defecto; 05 y 12 con `--use-reference`) y `full` (~1 h; recalcula el Wasserstein; **no se ha corrido de punta a punta**, solo se prueba la composición de sus comandos). Opciones: `--dry-run`, `--report-only`, `--only`, `--skip`, `--with-diagnostics` y `--publish`.
+- `--publish` copia el informe a `docs/reproduction_report.md` y pasa `--publish` a los scripts 14 y 15 (que solo publican lo autorizado, regla 3). El informe solo contiene agregados. **Conviene publicarlo con el código ya commiteado**: su encabezado marca «con cambios sin subir» si el árbol está sucio.
+- Cada ítem del informe tiene un estado: ✅ coincide con el paper (exacto o al redondeo), 🟡 desviación documentada, ℹ️ informativo, ❌ falla, ⏭️ omitido. Un paso que falla no detiene a los demás; el código de salida es 0 si no hay ❌, 1 si alguno falla y 2 si faltan los datos.
+- **Valores documentados que el informe vigila** (si cambian, pasan a ❌): Moran principal 0,419 y 0,430 (H28), Wasserstein 13/15 dentro de la banda (H24), escalas de la Fig. 1 con razones 0,9446 y 1,0105 (H35), π̂ en la frontera (H29) y las cuatro conclusiones con hora local (H33). **Si un valor cambia por una razón legítima** (por ejemplo, los autores aclaran la especificación del Moran), se actualizan las constantes de `validation/reproduction.py` y el hallazgo correspondiente.
+- El diagnóstico `07` no se ejecuta salvo con `--with-diagnostics` y queda rotulado: el runner solo lo nombra como ruta y nunca lo importa (regla 8). El runner **nunca** pasa `--write-reference` (reescribiría `reference/mobility/`).
+- `LASTMILE_OUTPUTS_DIR` redirige `outputs/` (la usa la prueba lenta de `tests/test_run_all_script.py` para no pisar los resultados reales). La consola recibe solo ASCII; el informe en archivo es UTF-8.
 
 **Memoria y paralelismo**
 - No correr `pytest` mientras corre un trabajo pesado: una corrida de `12_mobility_seeds.py` con 14 procesos más la suite fue detenida por falta de memoria (15,4 GB en la máquina; el navegador consume mucho). Usar **8 procesos como máximo**; la corrida de 200 semillas tarda ~40 min y guarda un parcial (`--resume`).
@@ -515,4 +526,4 @@ Todo lo de esta sección es operativo y verificado en este proyecto (Windows 11,
 - Primero un plan y se espera su visto bueno; una fase a la vez. Los resultados se le muestran **antes** de escribirlos en AGENTS.md. Los commits los hace solo el usuario. Se responde en español. No se fuerzan los resultados para que coincidan con el paper: si no coinciden, se documenta por qué.
 
 **Dónde queda cada salida**
-- `outputs/as_published/{tables,figures}`, `outputs/local_time/tables` y `outputs/diagnostics/` (todo ignorado por git). La única carpeta de figuras que se versiona es `docs/figures/` (regla 3); las cifras publicadas del paper, en `reference/paper_tables/`.
+- `outputs/as_published/{tables,figures}`, `outputs/local_time/tables`, `outputs/reproduction/` (informe y registro del ejecutor) y `outputs/diagnostics/` (todo ignorado por git). La única carpeta de figuras que se versiona es `docs/figures/` (regla 3); las cifras publicadas del paper, en `reference/paper_tables/`.

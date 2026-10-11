@@ -14,12 +14,16 @@ Réplica (mediana sobre los días con tránsito, como el código de los autores)
 EXACTAMENTE con `median_distance`, `median_time` y `count_wednesdays` de la base del paper; si no,
 sale con código 1. Además informa cuánto cambian los resultados con la variante documentada de
 contar los días sin tránsito como 0 (texto del paper). Solo variante `as_published` (hora UTC).
+Escribe `outputs/as_published/tables/median_distance_check.csv` (igualdad y diferencia máxima por
+columna: agregados, sin filas individuales), que lee el informe de `16_run_all.py`.
 """
 
 import sys
 
 import numpy as np
+import pandas as pd
 
+from lastmile_exposure import config
 from lastmile_exposure.exposure.vehicles_counts import count_outside_grid
 from lastmile_exposure.exposure.vehicles_distance import median_distance
 from lastmile_exposure.io.daily_metrics import load_daily_metrics
@@ -41,13 +45,26 @@ def main() -> int:
     paper = load_distance_dataset()[["hex", "hour", *CHECKED]]
     merged = rebuilt.merge(paper, on=["hex", "hour"], suffixes=("_rebuilt", "_paper"))
     print(f"Filas comparadas con la base del paper: {len(merged):,} de {len(grid):,}")
-    identical = {}
+    identical, max_diff = {}, {}
     for column in CHECKED:
         a, b = merged[f"{column}_rebuilt"], merged[f"{column}_paper"]
         identical[column] = bool(np.isclose(a, b, rtol=0.0, atol=1e-6).all())
+        max_diff[column] = float((a - b).abs().max())
         print(
             f"  {column:<16} identico: {identical[column]}  (max|dif| = {(a - b).abs().max():.2e})"
         )
+    summary = pd.DataFrame(
+        {
+            "check": list(CHECKED),
+            "identical": [identical[c] for c in CHECKED],
+            "n_rows": len(merged),
+            "n_expected": len(grid),
+            "max_abs_diff": [max_diff[c] for c in CHECKED],
+        }
+    )
+    out_dir = config.OUTPUTS_DIR / config.Variant.AS_PUBLISHED.value / "tables"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    summary.to_csv(out_dir / "median_distance_check.csv", index=False)
     positive = rebuilt["median_distance"] > 0
     print(
         f"  ceros en median_distance: {(~positive).mean():.4f} "

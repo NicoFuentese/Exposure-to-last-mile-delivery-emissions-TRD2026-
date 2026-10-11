@@ -161,6 +161,24 @@ def compare_columns(
     return pd.DataFrame(rows, columns=columns)
 
 
+def column_summary(report: pd.DataFrame) -> pd.DataFrame:
+    """Resumen por columna de un informe de `compare_columns`.
+
+    Una fila por columna con `cells` (celdas comparadas), `ok_cells` (dentro de tolerancia),
+    `max_abs_diff` (la mayor diferencia, sin redondear) y `max_limit` (el mayor límite permitido).
+    Es lo que escriben los scripts de las tablas para el informe de reproducción.
+    """
+    grouped = report.groupby("column")
+    return pd.DataFrame(
+        {
+            "cells": grouped.size(),
+            "ok_cells": grouped["ok"].sum().astype(int),
+            "max_abs_diff": grouped["abs_diff"].max(),
+            "max_limit": grouped["limit"].max(),
+        }
+    ).reset_index()
+
+
 # Test de Cameron-Trivedi (7,73): el valor depende de la versión exacta de los datos de los autores
 # (la dispersión cambia ~0,03 con 41 en vez de 42 miércoles), así que se usa el mismo criterio
 # relativo del ZINB (AGENTS.md D2): error relativo de 1 %.
