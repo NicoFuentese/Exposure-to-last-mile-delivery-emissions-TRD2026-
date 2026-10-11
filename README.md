@@ -1,4 +1,4 @@
-# Exposure-to-last-mile-delivery-emissions-TRD2026-
+# Exposure to last-mile delivery emissions: réplica en Python
 
 Réplica en Python de:
 
@@ -6,221 +6,113 @@ Réplica en Python de:
 
 El paper cruza, en una grilla **hexágono H3 (res. 9) × hora**, la actividad de vehículos de reparto (GPS) con la composición demográfica de la población presente (telefonía móvil) para medir qué grupos quedan más expuestos a la última milla en Santiago. Estima un **ZINB** para el conteo de vehículos y **OLS** para la distancia recorrida, con errores estándar agrupados por comuna, y compara contra un enfoque estático (demografía residencial).
 
-> **Estado:** proyecto en curso. El detalle metodológico, los hallazgos y las decisiones abiertas están en [`AGENTS.md`](AGENTS.md), que es la referencia de trabajo.
+> **Datos confidenciales.** Los datos del paper son confidenciales y no están en este repositorio. Sin ellos funcionan las pruebas sintéticas; los scripts de reproducción los necesitan (ver [Datos](#datos)).
 
-## Estructura del Proyecto
+**Documentación**
+
+- [`AGENTS.md`](AGENTS.md): metodología verificada, hallazgos, decisiones y estado del trabajo (referencia principal).
+- [`docs/conclusiones.md`](docs/conclusiones.md): ¿llegamos a las conclusiones del paper?
+- [`docs/paper_map.md`](docs/paper_map.md): dónde está cada ecuación, tabla y figura del paper en el código.
+- [`docs/figures/`](docs/figures/): figuras publicadas de la réplica.
+
+## Contenido del repositorio
 
 ```
 .
-├── AGENTS.md            # Guía de trabajo: metodología verificada, hallazgos, decisiones, plan
-├── CLAUDE.md            # Importa AGENTS.md para Claude Code
+├── AGENTS.md              # Guía de trabajo: metodología verificada, hallazgos y decisiones
 ├── README.md
-├── pyproject.toml       # Paquete y configuración de pytest/ruff (sin dependencias)
-├── requirements.txt     # Dependencias con versiones fijadas (Python 3.12)
-├── LICENSE              # MIT
-├── src/lastmile_exposure/   # Código de la réplica, un módulo por concepto del paper
-├── reference/paper_tables/  # Cifras publicadas (Tablas 2–5) para validar la réplica
-├── docs/paper_map.md    # Índice: dónde está cada ecuación, tabla y figura
-├── scripts/             # Puntos de entrada por fase (delgados)
-├── tests/               # Pruebas, incluida la validación contra el paper
-├── notebooks/           # Solo exploración
-├── outputs/             # Resultados generados. No se versiona
-├── .venv/               # Entorno virtual (uv). No se versiona
-└── data/                # Datos y paper. NO se versiona (confidencial)
-    ├── Basso2026TRD.pdf
-    ├── TRD_replication_share.zip        # Paquete de los autores, versión anterior (2026-09-29)
-    ├── TRD_replication_share (1).zip    # Paquete vigente de los autores (2026-10-10)
-    ├── replication_package/             # Versión anterior, extraída. Solo la lee el diagnóstico de data_base
-    └── replication_package_v2/          # Paquete vigente, extraído: el que lee el pipeline
+├── LICENSE                # MIT
+├── pyproject.toml         # Paquete y configuración de pytest y ruff
+├── requirements.txt       # Dependencias con versiones fijadas (Python 3.12)
+├── src/lastmile_exposure/ # Código de la réplica, un módulo por concepto del paper
+├── scripts/               # Un script por paso de la réplica
+├── tests/                 # Pruebas sintéticas y validación contra el paper
+├── reference/             # Cifras publicadas del paper y contrastes propios
+├── docs/                  # Índice paper → código, conclusiones y figuras
+├── notebooks/             # Solo exploración
+├── outputs/               # Resultados generados (no se versiona)
+└── data/                  # Datos confidenciales (no se versiona)
 ```
-
-**¿Buscas una fórmula o un paso?** Empieza por [`docs/paper_map.md`](docs/paper_map.md): mapea cada ecuación, tabla y figura del paper a su módulo. **¿Llegamos a las conclusiones del paper?** Ver [`docs/conclusiones.md`](docs/conclusiones.md).
 
 ## Requisitos
 
 - **Python 3.12**
-- **[uv](https://docs.astral.sh/uv/)** para crear y gestionar el entorno virtual
+- **[uv](https://docs.astral.sh/uv/)** para crear y gestionar el entorno virtual (una sola vez por máquina):
 
-Instalar `uv` (una sola vez por máquina):
+  ```bash
+  winget install --id=astral-sh.uv -e                 # Windows
+  curl -LsSf https://astral.sh/uv/install.sh | sh     # macOS / Linux
+  ```
 
-```powershell
-# Windows (PowerShell)
-powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
-# o bien
-winget install --id=astral-sh.uv -e
-```
+- **Librerías** (versiones exactas en [`requirements.txt`](requirements.txt)):
 
-```bash
-# macOS / Linux
-curl -LsSf https://astral.sh/uv/install.sh | sh
-```
-
-Comprobar: `uv --version`.
+  | Grupo | Paquetes | Uso |
+  |---|---|---|
+  | Núcleo | `numpy`, `pandas`, `pyarrow`, `scipy`, `tzdata` | datos, parquet, zona horaria `America/Santiago` |
+  | Modelos | `statsmodels` | ZINB, logit, OLS, errores estándar con cluster por comuna |
+  | Espacial | `h3` (v4), `shapely`, `pyproj`, `geopandas`, `libpysal`, `esda` | grilla H3, proyección a metros, Moran's I |
+  | Transporte óptimo | `pot` | distancia de Wasserstein (movilidad, Tabla 2) |
+  | Gráficos | `matplotlib` | figuras |
+  | Desarrollo | `pytest`, `ruff`, `ipykernel` | pruebas, lint y formato, notebooks |
 
 ## Entorno virtual
-
-### Crear el entorno e instalar las dependencias
 
 Desde la raíz del repositorio:
 
 ```bash
 uv venv --python 3.12 .venv
 uv pip install --python .venv -r requirements.txt
-uv pip install --python .venv -e . --no-deps      # instala el paquete lastmile_exposure (editable)
+uv pip install --python .venv -e . --no-deps      # instala el paquete lastmile_exposure
 ```
 
-### Activarlo
+Activarlo:
 
 | Shell | Comando |
 |---|---|
 | PowerShell | `.venv\Scripts\Activate.ps1` |
-| CMD | `.venv\Scripts\activate.bat` |
 | Git Bash | `source .venv/Scripts/activate` |
 | macOS / Linux | `source .venv/bin/activate` |
 
-Si PowerShell bloquea la activación por la política de ejecución, habilita los scripts solo para esa sesión:
+Si PowerShell bloquea la activación, habilita los scripts solo para esa sesión con `Set-ExecutionPolicy -Scope Process RemoteSigned`.
 
-```powershell
-Set-ExecutionPolicy -Scope Process RemoteSigned
-```
-
-Con el entorno activo, `python`, `pytest`, `ruff` y `jupyter` usan lo instalado en `.venv`. Para salir: `deactivate`.
-
-### Usarlo sin activarlo
-
-```bash
-uv run python mi_script.py          # ejecuta con el .venv del proyecto
-.venv\Scripts\python.exe mi_script.py    # Windows, llamando al intérprete directamente
-```
-
-### Instalar o actualizar dependencias
-
-Los entornos de `uv` **no incluyen `pip`**: usa `uv pip`.
-
-```bash
-uv pip install nombre-paquete            # con el entorno activo
-uv pip install --python .venv nombre-paquete   # sin activarlo
-```
-
-Si es una dependencia del proyecto, agrégala también a `requirements.txt` **con su versión fijada** (`paquete==x.y.z`). Para ver lo instalado:
-
-```bash
-uv pip list
-```
-
-### Recrear el entorno desde cero
-
-Si el entorno se corrompe o quieres partir limpio, bórralo y créalo de nuevo:
-
-```powershell
-# Windows (PowerShell)
-deactivate                      # si estaba activo
-Remove-Item -Recurse -Force .venv
-uv venv --python 3.12 .venv
-uv pip install --python .venv -r requirements.txt
-uv pip install --python .venv -e . --no-deps      # instala el paquete lastmile_exposure (editable)
-```
-
-```bash
-# macOS / Linux / Git Bash
-deactivate 2>/dev/null
-rm -rf .venv
-uv venv --python 3.12 .venv
-uv pip install --python .venv -r requirements.txt
-uv pip install --python .venv -e . --no-deps      # instala el paquete lastmile_exposure (editable)
-```
-
-### Comprobar que funciona
-
-```bash
-python -c "import statsmodels, geopandas, h3, esda; print('ok')"
-pytest --version
-ruff --version
-```
-
-> **En Windows la primera importación tras crear el entorno tarda varios minutos** (compilación de bytecode y escaneo del antivirus sobre ~800 MB). Es normal; las siguientes son rápidas.
-
-## Librerías
-
-| Grupo | Paquetes | Uso |
-|---|---|---|
-| Núcleo | `numpy`, `pandas`, `pyarrow`, `scipy`, `tzdata` | datos, parquet, tests, zona horaria `America/Santiago` |
-| Modelos | `statsmodels` | ZINB, logit, OLS, errores estándar con cluster por comuna |
-| Espacial | `h3` (v4), `shapely`, `pyproj`, `geopandas`, `libpysal`, `esda` | grilla H3, proyección a metros, mapas, Moran's I |
-| Gráficos | `matplotlib` | figuras |
-| Desarrollo | `pytest`, `ruff`, `ipykernel` | validación contra las tablas del paper, lint y formato, notebooks |
-
-Las versiones exactas están en [`requirements.txt`](requirements.txt).
+> En Windows la primera importación tras crear el entorno tarda varios minutos (escaneo del antivirus sobre ~800 MB). Es normal; las siguientes son rápidas.
 
 ## Datos
 
 Los datos del paper son **confidenciales** (*"The data that has been used is confidential"*) y **no se versionan**: `data/` está en `.gitignore`. No los subas a servicios externos ni los incluyas en commits.
 
-Para extraer el paquete vigente de los autores (una vez copiado el `.zip` en `data/`), en una carpeta nueva y vacía:
-
-```bash
-python -m zipfile -e "data/TRD_replication_share (1).zip" data/replication_package_v2
-```
-
-El paquete incluye las bases finales de modelación, los conteos y las distancias diarias (41 miércoles), las tablas 4 y 5 regeneradas por los autores y el código R original, pero **no** el GPS crudo. La versión anterior (`replication_package/`) solo se conserva por su `00_out/data_base` de 2 miércoles, que lee el diagnóstico de las estrellas; los autores lo reconocieron como un residuo de prueba. Qué contiene cada archivo, sus estadísticas y sus limitaciones están en la sección 8 de [`AGENTS.md`](AGENTS.md).
-
 ## Reproducir resultados
 
-Con el entorno activo y los datos en `data/replication_package_v2/`:
+Con el entorno activo y los datos disponibles en `data/`:
+
+| Script | Qué reproduce | Duración |
+|---|---|---|
+| `scripts/01_table2.py` | Tabla 2 (población flotante) | ~30 s |
+| `scripts/02_distance_tables.py` | Columnas de distancia (OLS) de las Tablas 4 y 5 | ~15 s |
+| `scripts/03_zinb_tables.py` | Columna ZINB de las Tablas 4 y 5 | ~2 min |
+| `scripts/04_median_counts.py` | Mediana de conteos desde los 42 archivos diarios | ~1 min |
+| `scripts/05_mobility.py` | Wasserstein y ranking de movilidad (Tabla 2), según el texto del paper | ~10 min; `--use-reference` es instantáneo |
+| `scripts/06_inference.py` | Errores estándar por comuna y estrellas de las Tablas 4 y 5 | ~8 min |
+| `scripts/07_stars_diagnosis.py` | **Diagnóstico, no es una réplica** (usa la base de 2 miércoles; no usar sus resultados) | — |
+| `scripts/08_dispersion_test.py` | Test de Cameron–Trivedi (7,73) | ~10 s |
+| `scripts/09_moran.py` | I de Moran (0,4694 y 0,4756) | segundos |
+| `scripts/10_zero_inflation.py` | π del ZINB (diagnóstico; el paper no lo reporta) | ~4 min |
+| `scripts/11_median_distance.py` | Mediana de distancia y tiempo desde los 41 archivos diarios | ~30 s |
+| `scripts/12_mobility_seeds.py` | Wasserstein con el método de los autores y 200 semillas | ~40 min con 8 procesos; `--use-reference` es instantáneo |
+| `scripts/13_local_time_sensitivity.py` | Sensibilidad en hora local (`America/Santiago`) de las Tablas 4 y 5 | ~2 min |
+| `scripts/14_figures.py` | Figs. 6, 7, 8, 9 y 10 | segundos |
+| `scripts/15_maps.py` | Fig. 1 y sustituto de la Fig. 2 | ~30 s |
+
+Cada script se ejecuta con `python scripts/NN_nombre.py` y escribe en `outputs/` (los resultados de la réplica en `outputs/as_published/`). Los que validan contra cifras publicadas (`reference/paper_tables/`) terminan con código 1 si algo difiere de su redondeo; los de diagnóstico y sensibilidad terminan siempre con 0. Los scripts 14 y 15 aceptan `--publish` para copiar las figuras autorizadas a `docs/figures/`. El detalle de cada script está en [`scripts/README.md`](scripts/README.md).
+
+## Pruebas
 
 ```bash
-python scripts/01_table2.py            # Tabla 2 (población flotante)
-python scripts/02_distance_tables.py   # columnas de distancia de las Tablas 4 y 5
-python scripts/03_zinb_tables.py        # columna ZINB de las Tablas 4 y 5 (~2 min)
-python scripts/04_median_counts.py      # mediana de conteos desde los 42 archivos diarios (~1 min)
-python scripts/11_median_distance.py    # mediana de distancia y tiempo desde los 41 archivos diarios (~30 s)
-python scripts/05_mobility.py --use-reference   # Wasserstein/movilidad (Tabla 2); sin la bandera tarda ~10 min
-python scripts/12_mobility_seeds.py --use-reference   # Wasserstein con el metodo de los autores y 200 semillas; sin la bandera ~40 min con 8 procesos
-python scripts/13_local_time_sensitivity.py   # sensibilidad en hora local, Tablas 4 y 5 (~2 min)
-python scripts/14_figures.py --publish   # Figs. 6, 7, 8, 9 y 10 (segundos); copia a docs/figures/
-python scripts/15_maps.py --publish      # Fig. 1 y sustituto de la Fig. 2 (~30 s); copia los PNG a docs/figures/
-python scripts/06_inference.py          # SE por comuna y estrellas de las Tablas 4 y 5 (~8 min)
-python scripts/08_dispersion_test.py    # Cameron-Trivedi (7,73): rapido
-python scripts/09_moran.py              # I de Moran (0,4694 / 0,4756): rapido; la especificacion no esta identificada
-python scripts/10_zero_inflation.py     # pi del ZINB (diagnostico; el paper no lo reporta): ~4 min
-python scripts/07_stars_diagnosis.py    # DIAGNOSTICO con data_base (2 miercoles): NO es una replica, no usar sus resultados
+pytest                 # todas; las que usan los datos se saltan solas si no están
+pytest -m "not slow"   # omite los ajustes del ZINB completo sobre datos reales (minutos)
 ```
 
-Cada script escribe sus tablas en `outputs/as_published/tables/`, las compara celda a celda con las cifras publicadas (`reference/paper_tables/`) y termina con código 1 si alguna difiere del paper más de su redondeo. El mapa de qué está reproducido y dónde vive cada fórmula está en [`docs/paper_map.md`](docs/paper_map.md).
-
-## Desarrollo
-
-```bash
-pytest            # constantes, estructura, modelos sintéticos y validación contra las Tablas 2, 4 y 5
-pytest -m "not slow"   # omite los ajustes ZINB completos sobre datos reales (minutos)
-                  # (las pruebas que usan datos confidenciales se saltan solas si no están)
-ruff check .      # lint
-ruff format .     # formato
-```
-
-## Hoja de ruta
-
-| Fase | Estado |
-|---|---|
-| Comprensión del paper y guía de trabajo (`AGENTS.md`) | ✅ |
-| Análisis del paquete de los autores y de los datos | ✅ |
-| Entorno de trabajo (`uv`, `requirements.txt`) | ✅ |
-| Tabla 2 y columnas de distancia (OLS) de las Tablas 4 y 5, tal cual el paquete | ✅ |
-| Columna ZINB de las Tablas 4 y 5 (a la precisión impresa, 6·10⁻⁵: el máximo está en π = 0, es la NB) | ✅ |
-| Mediana de conteos reconstruida desde los archivos diarios (idéntica al paper) | ✅ |
-| Mediana de distancia y tiempo reconstruida desde los 41 archivos diarios del paquete v2 (idéntica al paper) | ✅ |
-| Wasserstein y ranking de movilidad (Tabla 2): los autores usaron una muestra aleatoria sin semilla, así que los valores no se reproducen exactamente; con 200 semillas, 13/15 caen en la banda del 95 % y los extremos son estables (`scripts/12_mobility_seeds.py`) | 🟡 |
-| Errores con cluster por comuna y estrellas: 88/88 contra las tablas regeneradas por los autores (las impresas en el paper no salen del método correcto, como reconocen) | ✅ |
-| Test de Cameron–Trivedi (7,73): 7,750, dentro de la tolerancia | ✅ |
-| I de Moran: la lectura literal no reproduce; las alternativas solo se acercan (~1–2 %), especificación no identificada | 🟡 |
-| π (el paper no lo reporta): máximo del perfil en π = 0, IC 95 % [0, ~10⁻⁴]; diagnóstico | ℹ️ |
-| Sensibilidad en hora local (`America/Santiago`), conteos y distancia, horas 7–19: las cuatro conclusiones del paper se mantienen (`scripts/13_local_time_sensitivity.py`) | ✅ |
-| Figuras 6, 8, 9 y 10 (mismos puntos que las tablas; `docs/figures/`) y Fig. 7 (factores derivados de las barras impresas) | ✅ |
-| Fig. 1 (mapas): patrón reproducido, escalas 1.511 y 7.073 frente a 1600 y 7000 del paper | 🟡 |
-| Fig. 2 (puntos GPS por hexágono): no reproducible sin el GPS crudo; hay un sustituto rotulado (PNG en `docs/figures/`) | 🚫 |
-| Extensión a métricas de ruido | ⏳ |
-
-Ya están reproducidos, con código en el paquete y scripts ejecutables, la **Tabla 2** y las tres columnas de distancia (OLS) de las **Tablas 4 y 5** (al redondeo del paper), y la columna **ZINB** (a la precisión impresa: con estos datos el máximo de la verosimilitud está en π = 0, es decir la NB; el ZINB de `pscl` se detiene antes del máximo). Los detalles, incluidas las diferencias entre el paper y el código de los autores (por ejemplo, que la hora de los conteos de vehículos está en UTC), están en `AGENTS.md`.
+Estilo del código: `ruff check .` y `ruff format .`.
 
 ## Licencia
 
