@@ -34,7 +34,7 @@ El paper cruza, en una grilla **hexágono H3 (res. 9) × hora**, la actividad de
     └── replication_package_v2/          # Paquete vigente, extraído: el que lee el pipeline
 ```
 
-**¿Buscas una fórmula o un paso?** Empieza por [`docs/paper_map.md`](docs/paper_map.md): mapea cada ecuación, tabla y figura del paper a su módulo.
+**¿Buscas una fórmula o un paso?** Empieza por [`docs/paper_map.md`](docs/paper_map.md): mapea cada ecuación, tabla y figura del paper a su módulo. **¿Llegamos a las conclusiones del paper?** Ver [`docs/conclusiones.md`](docs/conclusiones.md).
 
 ## Requisitos
 
