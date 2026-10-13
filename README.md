@@ -45,6 +45,7 @@ La réplica reproduce los resultados del paper con los mismos valores y confirma
 │   ├── paper_map.md             # Índice paper → código
 │   ├── reproduction_report.md   # Informe de reproducción publicado
 │   └── figures/                 # Figuras publicadas
+├── entregables/           # Documentos LaTeX y presentaciones (ver su README)
 ├── notebooks/             # Solo exploración
 ├── outputs/               # Resultados generados (no se versiona)
 └── data/                  # Datos confidenciales (no se versiona)

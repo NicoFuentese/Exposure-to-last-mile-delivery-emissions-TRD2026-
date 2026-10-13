@@ -227,3 +227,24 @@ outputs/
 
 # uv.lock: vacío mientras las dependencias vivan en requirements.txt (ver README); reevaluar al congelar el entorno
 uv.lock
+
+# Entregables (LaTeX): se versionan las fuentes; los intermedios y los PDF compilados no.
+# Para versionar un PDF concreto: git add -f entregables/<nombre>/<archivo>.pdf
+entregables/**/*.aux
+entregables/**/*.log
+entregables/**/*.out
+entregables/**/*.toc
+entregables/**/*.nav
+entregables/**/*.snm
+entregables/**/*.vrb
+entregables/**/*.fls
+entregables/**/*.fdb_latexmk
+entregables/**/*.synctex.gz
+entregables/**/*.bbl
+entregables/**/*.blg
+entregables/**/*.bcf
+entregables/**/*.run.xml
+entregables/**/*.pdf
+
+# Figuras extraídas del paper impreso (derechos de Elsevier): se usan en las presentaciones, no se versionan.
+entregables/**/*_paperOriginal.*

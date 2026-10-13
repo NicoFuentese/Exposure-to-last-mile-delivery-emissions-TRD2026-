@@ -1,0 +1,31 @@
+% Plantilla de presentación (Beamer). Compilar con
+%   latexmk -pdf -interaction=nonstopmode presentacion.tex
+\documentclass[aspectratio=169]{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{graphicx}
+\usepackage[backend=biber,style=authoryear]{biblatex}
+\addbibresource{../referencias.bib}
+
+\graphicspath{{../../docs/figures/}{figuras/}}
+
+\title{T\'itulo de la presentaci\'on}
+\author{Autor}
+\date{\today}
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}{Referencia}
+  R\'eplica de \textcite{basso2026}.
+\end{frame}
+
+\begin{frame}[allowframebreaks]{Bibliograf\'ia}
+  \printbibliography
+\end{frame}
+
+\end{document}
