@@ -8,7 +8,7 @@ Guía para agentes (y personas) que trabajen en este repositorio. Contiene lo ve
 
 ---
 
-## Estado en una mirada (actualizado 2026-10-11)
+## Estado en una mirada (actualizado 2026-10-13)
 
 - **Fases:** 0–5 y 7 hechas; la 6 (autores) tiene la primera ronda respondida y la segunda redactada (la envía el usuario el lunes 2026-10-12); la 8 (ruido) está pendiente. Detalle en §10.
 - **Qué se reproduce (§7.2):** Tabla 2 (medias, desviaciones y porcentajes) exacta; columnas OLS de las Tablas 4 y 5 al 4.º decimal; columna «ZINB» a la precisión impresa (es en realidad la NB, π̂ = 0); medianas de conteos (42 miércoles) y de distancia y tiempo (41) idénticas; estrellas 88/88 contra las tablas que regeneraron los autores; Cameron–Trivedi 7,750 frente a 7,73; Figs. 6, 8, 9 y 10.
@@ -16,7 +16,8 @@ Guía para agentes (y personas) que trabajen en este repositorio. Contiene lo ve
 - **Dónde el paper o su código difieren de lo que dicen (con su hallazgo):** hora UTC en los camiones frente a hora local en la población (H1, H32; sensibilidad en H33: las conclusiones se mantienen); estrellas impresas calculadas con una base de 2 miércoles (H26, H32); cluster `NULL` en su ZINB estático (H26, H31); (1−π) aplicado dos veces en su efecto marginal (H10); columna «ZINB» que es la NB (H23, H29); distancia sin recorte por hexágono (H4); eje derecho reescalado en las Figs. 6–10 (H34).
 - **¿Se confirman las conclusiones del paper?** Sí en lo cualitativo (U invertida por GSE, pico en 25–34, cambio de C1b entre dinámico y estático), también al corregir la hora; no la cifra del 24 % de hombres ni la significancia de varios efectos impresos. Síntesis completa en `docs/conclusiones.md`.
 - **Siguiente:** (a) respuesta de los autores a la segunda ronda (§8.4) y actualizar H10, H26, H28 y D8; (b) Fase 8; (c) decisiones abiertas D5, D6, D8, D9 y D11 (§7.3).
-- **Reproducir todo:** `python scripts/16_run_all.py` regenera tablas y figuras y deja un informe de qué se reproduce en `outputs/reproduction/report.md` (~9 min; ver §12).
+- **Reproducir todo:** `python scripts/16_run_all.py` regenera tablas y figuras y deja un informe de qué se reproduce en `outputs/reproduction/report.md` (~9 min; ver §12). `scripts/17_paper_format_tables.py` (Tablas 4 y 5 en el formato del paper, réplica e impreso lado a lado) es **opcional**: no forma parte del ejecutor y se corre aparte, después del 03 y el 06.
+- **Para explicar el paper y la réplica:** `docs/guia_paper_y_replica.md` (modelos, tablas, figuras, estrellas y diferencias con lo impreso); `docs/conclusiones.md` resume qué conclusiones se sostienen.
 - **Cómo trabajar aquí:** reglas en §1 y entorno, comandos y trampas conocidas en §12.
 
 ---
@@ -76,7 +77,7 @@ src/lastmile_exposure/      # paquete (layout src/, instalable en editable, sin 
 ├── runner.py               # ejecutor final: corre los scripts en orden y registra cada paso (informe: validation/reproduction.py)
 ├── models/                 # zinb, ols, two_part, marginal_effects
 ├── inference/              # cluster por comuna, Moran, Cameron-Trivedi
-├── reporting/              # tablas 2/4/5, estrellas, sensibilidad, emisiones (Fig. 7)
+├── reporting/              # tablas 2/4/5, estrellas, sensibilidad, emisiones (Fig. 7), tablas en el formato del paper (`paper_format`)
 ├── figures/                # mapas (Fig. 1 y sustituto de la Fig. 2), efectos marginales (6, 8-10) y gramos (7)
 └── validation/             # comparación celda a celda contra el paper  (+ `stars_diagnosis.py`: diagnóstico con `data_base`, NO es réplica; ver regla 8)
 reference/paper_tables/     # cifras publicadas de las Tablas 2-5 (CSV, se versionan)
@@ -86,6 +87,9 @@ scripts/r_oracle/          # script de R (pscl) del contraste; R solo se usa par
 scripts/                    # NN_*.py, uno por fase; delgados, sin lógica
 tests/                      # sintéticas (corren sin datos) y validation/ (con datos reales; se saltan si no están); marcador `slow`
 docs/paper_map.md           # índice paper -> módulo
+docs/guia_paper_y_replica.md # guía estándar para explicar el paper y la réplica (modelos, tablas, figuras, estrellas)
+docs/conclusiones.md        # ¿llegamos a las conclusiones del paper?
+docs/reproduction_report.md # informe de reproducción publicado (`16_run_all.py --publish`)
 docs/figures/               # figuras publicadas: solo las autorizadas (regla 3); todo lo demás va a outputs/
 notebooks/                  # solo exploración
 outputs/<variante>/         # resultados; ignorado por git
@@ -477,6 +481,7 @@ Regresores `X` (11): `genero_masc, gse_c1a, gse_c1b, gse_c2, gse_c3, gse_de (= g
 - **Fase 7 — Figuras:** ✅ (2026-10-11) Figs. 6, 8, 9 y 10 (H34), Fig. 1 (H35), Fig. 7 con factores derivados (H36) y un sustituto rotulado de la Fig. 2 (no hay GPS crudo); las figuras de coeficientes y los PNG de la Fig. 1 y del sustituto de la Fig. 2 se versionan en `docs/figures/`; los PDF vectoriales de los mapas quedan en `outputs/`. Las Figs. 3–5 son diagramas y no se replican.
 - **Fase 8 — Extensión a ruido** (objetivo posterior, §7 H17): reemplazar `median_vehicles` por la métrica de ruido reutilizando el pipeline, con hora local desde el inicio.
 - **Ejecutor final:** ✅ (2026-10-11) `scripts/16_run_all.py` (`runner.py` y `validation/reproduction.py`): regenera todo y deja el informe de reproducción; ver §12.
+- **Presentación — Tablas 4 y 5 en formato del paper y guía:** ✅ (2026-10-13) `scripts/17_paper_format_tables.py` y `reporting/paper_format.py` ponen la réplica (valor y estrellas) junto a lo impreso en `outputs/as_published/tables/table{4,5}_vs_paper_*` (`‡` el valor difiere en más de una unidad del último dígito impreso; `†` las estrellas difieren). **Opcional por decisión del usuario (2026-10-13): no se agrega al ejecutor** (tocaría `runner.py` y las pruebas que fijan el número de pasos); es presentación, no entra en la validación. Necesita antes el 03 y el 06 (termina con código 2 si faltan). La guía `docs/guia_paper_y_replica.md` explica modelos, tablas, figuras y estrellas.
 - **Pendiente sin fase asignada:** las decisiones abiertas D5, D6, D8, D9 y D11 (§7.3).
 
 ---
@@ -497,12 +502,12 @@ Regresores `X` (11): `genero_masc, gse_c1a, gse_c1b, gse_c2, gse_c3, gse_de (= g
 Todo lo de esta sección es operativo y verificado en este proyecto (Windows 11, `uv`, Python 3.12). Comandos de reproducción por script: `README.md` y `scripts/README.md`; índice paper → módulo: `docs/paper_map.md`.
 
 **Pruebas y calidad**
-- `.venv/Scripts/python.exe -m pytest` corre todo (408 pruebas el 2026-10-11, ~16 min); `-m "not slow"` omite las que ajustan el ZINB completo. `tests/` son pruebas sintéticas (corren sin datos) y `tests/validation/` usan los datos reales (se saltan si `data/` no está).
+- `.venv/Scripts/python.exe -m pytest` corre todo (415 pruebas recogidas el 2026-10-13, ~16 min; 408 pasaron completas el 2026-10-11 y las 7 de `tests/test_paper_format.py`, añadidas después, pasan por separado); `-m "not slow"` omite las que ajustan el ZINB completo. `tests/` son pruebas sintéticas (corren sin datos) y `tests/validation/` usan los datos reales (se saltan si `data/` no está).
 - `ruff check` y `ruff format` (línea máx. 100) deben quedar limpios. Cada módulo de `src/` abre con el docstring de la regla 1 de §2.1 (`tests/test_structure.py`).
 - Guardianes: `tests/test_diagnostic_isolation.py` (el diagnóstico con `data_base` no entra al pipeline, regla 8) y `tests/test_published_figures.py` (solo lo autorizado entra a `docs/figures/`, regla 3).
 
 **Ejecutor final (`scripts/16_run_all.py`)**
-- Corre los scripts en orden de dependencia, de a uno, y escribe en `outputs/reproduction/` el informe (`report.md`, `report.csv`), `run_log.json` y un log por script. Modos: `quick` (~4 min medidos; sin 05, 06, 10 y 12), `standard` (~9 min medidos, por defecto; 05 y 12 con `--use-reference`) y `full` (~1 h; recalcula el Wasserstein; **no se ha corrido de punta a punta**, solo se prueba la composición de sus comandos). Opciones: `--dry-run`, `--report-only`, `--only`, `--skip`, `--with-diagnostics` y `--publish`.
+- Corre los scripts en orden de dependencia, de a uno, y escribe en `outputs/reproduction/` el informe (`report.md`, `report.csv`), `run_log.json` y un log por script. Modos: `quick` (~4 min medidos; sin 05, 06, 10 y 12), `standard` (~9 min medidos, por defecto; 05 y 12 con `--use-reference`) y `full` (~1 h; recalcula el Wasserstein; **no se ha corrido de punta a punta**, solo se prueba la composición de sus comandos). Opciones: `--dry-run`, `--report-only`, `--only`, `--skip`, `--with-diagnostics` y `--publish`. No incluye el script 17 (tablas en formato del paper), que es opcional y se corre aparte.
 - `--publish` copia el informe a `docs/reproduction_report.md` y pasa `--publish` a los scripts 14 y 15 (que solo publican lo autorizado, regla 3). El informe solo contiene agregados. **Conviene publicarlo con el código ya commiteado**: su encabezado marca «con cambios sin subir» si el árbol está sucio.
 - Cada ítem del informe tiene un estado: ✅ coincide con el paper (exacto o al redondeo), 🟡 desviación documentada, ℹ️ informativo, ❌ falla, ⏭️ omitido. Un paso que falla no detiene a los demás; el código de salida es 0 si no hay ❌, 1 si alguno falla y 2 si faltan los datos.
 - **Valores documentados que el informe vigila** (si cambian, pasan a ❌): Moran principal 0,419 y 0,430 (H28), Wasserstein 13/15 dentro de la banda (H24), escalas de la Fig. 1 con razones 0,9446 y 1,0105 (H35), π̂ en la frontera (H29) y las cuatro conclusiones con hora local (H33). **Si un valor cambia por una razón legítima** (por ejemplo, los autores aclaran la especificación del Moran), se actualizan las constantes de `validation/reproduction.py` y el hallazgo correspondiente.

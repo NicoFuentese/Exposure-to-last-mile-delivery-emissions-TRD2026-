@@ -21,6 +21,7 @@ La réplica reproduce los resultados del paper con los mismos valores y confirma
 **Documentación**
 
 - [`AGENTS.md`](AGENTS.md): metodología verificada, hallazgos, decisiones y estado del trabajo (referencia principal).
+- [`docs/guia_paper_y_replica.md`](docs/guia_paper_y_replica.md): guía para entender y explicar el paper y la réplica (modelos, tablas, figuras, estrellas y diferencias con lo impreso).
 - [`docs/conclusiones.md`](docs/conclusiones.md): ¿llegamos a las conclusiones del paper?
 - [`docs/paper_map.md`](docs/paper_map.md): dónde está cada ecuación, tabla y figura del paper en el código.
 - [`docs/figures/`](docs/figures/): figuras publicadas de la réplica.
@@ -38,7 +39,12 @@ La réplica reproduce los resultados del paper con los mismos valores y confirma
 ├── scripts/               # Un script por paso de la réplica
 ├── tests/                 # Pruebas sintéticas y validación contra el paper
 ├── reference/             # Cifras publicadas del paper y contrastes propios
-├── docs/                  # Índice paper → código, conclusiones y figuras
+├── docs/                  # Documentación de la réplica
+│   ├── guia_paper_y_replica.md  # Guía: modelos, tablas, figuras y diferencias con el paper
+│   ├── conclusiones.md          # ¿Llegamos a las conclusiones del paper?
+│   ├── paper_map.md             # Índice paper → código
+│   ├── reproduction_report.md   # Informe de reproducción publicado
+│   └── figures/                 # Figuras publicadas
 ├── notebooks/             # Solo exploración
 ├── outputs/               # Resultados generados (no se versiona)
 └── data/                  # Datos confidenciales (no se versiona)
@@ -125,8 +131,9 @@ O ejecuta los scripts por separado:
 | `scripts/14_figures.py` | Figs. 6, 7, 8, 9 y 10 | segundos |
 | `scripts/15_maps.py` | Fig. 1 y sustituto de la Fig. 2 | ~30 s |
 | `scripts/16_run_all.py` | Ejecuta los pasos anteriores en orden y arma el informe de reproducción | ~4 min (`--mode quick`) a ~9 min (estándar) |
+| `scripts/17_paper_format_tables.py` | Tablas 4 y 5 en el formato del paper, réplica y cifras impresas lado a lado (necesita antes el 03 y el 06) | segundos |
 
-Los scripts son independientes entre sí, salvo uno: **ejecuta `03_zinb_tables.py` antes que `14_figures.py`**, porque las figuras leen las tablas que deja el 03 (si faltan, el 14 se detiene y lo avisa). `16_run_all.py` ya respeta ese orden.
+Los scripts son independientes entre sí, salvo dos: **ejecuta `03_zinb_tables.py` antes que `14_figures.py`**, porque las figuras leen las tablas que deja el 03, y **el 03 y el 06 antes que `17_paper_format_tables.py`**, que solo presenta lo que ellos calcularon (si faltan, el 14 y el 17 se detienen y lo avisan). `16_run_all.py` respeta el orden del 03 y el 14; el 17 es opcional y no forma parte del ejecutor, se corre aparte.
 
 Cada script se ejecuta con `python scripts/NN_nombre.py` y escribe en `outputs/` (los resultados de la réplica en `outputs/as_published/`). Los que validan contra cifras publicadas (`reference/paper_tables/`) terminan con código 1 si algo difiere de su redondeo; los de diagnóstico y sensibilidad terminan siempre con 0. Los scripts 14 y 15 aceptan `--publish` para copiar las figuras autorizadas a `docs/figures/`. El detalle de cada script está en [`scripts/README.md`](scripts/README.md).
 
